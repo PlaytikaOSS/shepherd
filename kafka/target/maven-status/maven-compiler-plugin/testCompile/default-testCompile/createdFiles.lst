@@ -1,0 +1,8 @@
+com/playtika/shepherd/AbstractPushHerdTest.class
+com/playtika/shepherd/internal/ProtocolHelperTest.class
+com/playtika/shepherd/JsonPushHerdTest.class
+com/playtika/shepherd/StringPushHerdTest.class
+com/playtika/shepherd/internal/RoundRobinAssignorTest.class
+com/playtika/shepherd/serde/DeSerUtilsTest.class
+com/playtika/shepherd/ByteBufferPushHerdTest.class
+com/playtika/shepherd/JsonPushHerdTest$BlackSheep.class
