@@ -1,7 +1,0 @@
-/home/runner/work/shepherd/shepherd/kafka/src/test/java/com/playtika/shepherd/serde/DeSerUtilsTest.java
-/home/runner/work/shepherd/shepherd/kafka/src/test/java/com/playtika/shepherd/ByteBufferPushHerdTest.java
-/home/runner/work/shepherd/shepherd/kafka/src/test/java/com/playtika/shepherd/JsonPushHerdTest.java
-/home/runner/work/shepherd/shepherd/kafka/src/test/java/com/playtika/shepherd/AbstractPushHerdTest.java
-/home/runner/work/shepherd/shepherd/kafka/src/test/java/com/playtika/shepherd/internal/ProtocolHelperTest.java
-/home/runner/work/shepherd/shepherd/kafka/src/test/java/com/playtika/shepherd/StringPushHerdTest.java
-/home/runner/work/shepherd/shepherd/kafka/src/test/java/com/playtika/shepherd/internal/RoundRobinAssignorTest.java
