@@ -150,10 +150,17 @@ public class PastureCoordinator extends AbstractCoordinator {
     }
 
     @Override
-    public JoinGroupRequestProtocolCollection metadata() {
+    protected boolean onJoinPrepare(Timer timer, int generation, String memberId) {
         herd.reset();
+        listener.cleanup();
         leaderElected = null;
 
+        logger.info("Rebalance started generation: {}, memberId: {}", generation, memberId);
+        return true;
+    }
+
+    @Override
+    public JoinGroupRequestProtocolCollection metadata() {
         return new JoinGroupRequestProtocolCollection(Collections.singleton(
                         new JoinGroupRequestData.JoinGroupRequestProtocol()
                                 .setName(Protocol.SIMPLE.protocol())
@@ -197,12 +204,6 @@ public class PastureCoordinator extends AbstractCoordinator {
         assignmentSnapshot = newAssignment;
         lastCompletedGenerationId = generation;
         listener.assigned(newAssignment.getAssigned(), newAssignment.getVersion(), generation, isLeader(newAssignment));
-    }
-
-    @Override
-    protected boolean onJoinPrepare(Timer timer, int generation, String memberId) {
-        logger.info("Rebalance started generation: {}, memberId: {}", generation, memberId);
-        return true;
     }
 
     @Override
