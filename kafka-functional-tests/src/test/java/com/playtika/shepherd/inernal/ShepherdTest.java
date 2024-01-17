@@ -11,8 +11,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static com.playtika.shepherd.inernal.CheckedHerd.checked;
@@ -46,10 +46,18 @@ public class ShepherdTest extends BasicKafkaTest {
         });
 
 
-        AtomicReference<List<ByteBuffer>> cows1 = new AtomicReference<>(List.of());
-        PastureListener<ByteBuffer> rebalanceListener1 = (population, version, generation, isLeader) -> {
-            logger.info("Assigned cows1 [{}]", toBytes(population));
-            cows1.set(population);
+        LinkedBlockingQueue<ByteBuffer> cows1 = new LinkedBlockingQueue<>();
+        PastureListener<ByteBuffer> rebalanceListener1 = new PastureListener<>() {
+            @Override
+            public void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
+                logger.info("Assigned cows1 [{}]", toBytes(population));
+                cows1.addAll(population);
+            }
+
+            @Override
+            public void cleanup() {
+                cows1.clear();
+            }
         };
 
         PastureShepherd herder1 = new PastureShepherdBuilder()
@@ -63,14 +71,22 @@ public class ShepherdTest extends BasicKafkaTest {
         herder1.start();
 
         await().timeout(ofSeconds(5)).untilAsserted(() -> {
-            assertThat(cows1.get()).containsExactlyInAnyOrder(cow1, cow2);
+            assertThat(cows1).containsExactlyInAnyOrder(cow1, cow2);
         });
 
         //setup another pasture
-        AtomicReference<List<ByteBuffer>> cows2 = new AtomicReference<>(List.of());
-        PastureListener<ByteBuffer> rebalanceListener2 = (population, version, generation, isLeader) -> {
-            logger.info("Assigned cows2 [{}]", toBytes(population));
-            cows2.set(population);
+        LinkedBlockingQueue<ByteBuffer> cows2 = new LinkedBlockingQueue<>();
+        PastureListener<ByteBuffer> rebalanceListener2 = new PastureListener<>() {
+            @Override
+            public void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
+                logger.info("Assigned cows2 [{}]", toBytes(population));
+                cows2.addAll(population);
+            }
+
+            @Override
+            public void cleanup() {
+                cows2.clear();
+            }
         };
 
         PastureShepherd herder2 = new PastureShepherdBuilder()
@@ -83,15 +99,15 @@ public class ShepherdTest extends BasicKafkaTest {
         herder2.start();
 
         await().timeout(ofSeconds(5)).untilAsserted(() -> {
-            assertThat(cows1.get().size()).isEqualTo(1);
-            assertThat(cows2.get().size()).isEqualTo(1);
+            assertThat(cows1.size()).isEqualTo(1);
+            assertThat(cows2.size()).isEqualTo(1);
         });
 
         //stop first pasture
         herder1.stop(Duration.ofSeconds(10).toMillis());
 
         await().timeout(ofSeconds(3)).untilAsserted(() -> {
-            assertThat(cows2.get()).containsExactlyInAnyOrder(cow1, cow2);
+            assertThat(cows2).containsExactlyInAnyOrder(cow1, cow2);
         });
 
     }
@@ -118,13 +134,17 @@ public class ShepherdTest extends BasicKafkaTest {
             }
         });
 
-
-        AtomicReference<List<ByteBuffer>> cows1 = new AtomicReference<>(List.of());
+        LinkedBlockingQueue<ByteBuffer> cows1 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener1 = new PastureListener<>() {
             @Override
             public void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
                 logger.info("Assigned cows1 [{}]", toBytes(population));
-                cows1.set(population);
+                cows1.addAll(population);
+            }
+
+            @Override
+            public void cleanup() {
+                cows1.clear();
             }
         };
 
@@ -136,12 +156,19 @@ public class ShepherdTest extends BasicKafkaTest {
                 .setProperties(TEST_PROPERTIES)
                 .build();
 
-        AtomicReference<List<ByteBuffer>> cows2 = new AtomicReference<>(List.of());
+
+        //setup another pasture
+        LinkedBlockingQueue<ByteBuffer> cows2 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener2 = new PastureListener<>() {
             @Override
             public void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
                 logger.info("Assigned cows2 [{}]", toBytes(population));
-                cows2.set(population);
+                cows2.addAll(population);
+            }
+
+            @Override
+            public void cleanup() {
+                cows2.clear();
             }
         };
 
@@ -157,9 +184,9 @@ public class ShepherdTest extends BasicKafkaTest {
         herder2.start();
 
         await().timeout(ofSeconds(5)).untilAsserted(() -> {
-            assertThat(cows1.get().size()).isEqualTo(1);
-            assertThat(cows2.get().size()).isEqualTo(1);
-            assertThat(Stream.concat(cows1.get().stream(), cows2.get().stream()).toList()).containsExactlyInAnyOrder(cow1, cow2);
+            assertThat(cows1.size()).isEqualTo(1);
+            assertThat(cows2.size()).isEqualTo(1);
+            assertThat(Stream.concat(cows1.stream(), cows2.stream()).toList()).containsExactlyInAnyOrder(cow1, cow2);
         });
 
         //add cows to herd
@@ -172,9 +199,9 @@ public class ShepherdTest extends BasicKafkaTest {
         Stream.of(herder1, herder2).filter(PastureShepherd::isLeaderElected).forEach(PastureShepherd::setNeedsReconfigRebalance);
 
         await().timeout(ofSeconds(5)).untilAsserted(() -> {
-            assertThat(cows1.get().size()).isEqualTo(2);
-            assertThat(cows2.get().size()).isEqualTo(2);
-            assertThat(Stream.concat(cows1.get().stream(), cows2.get().stream()).toList()).containsExactlyInAnyOrder(cow1, cow2, cow3, cow4);
+            assertThat(cows1.size()).isEqualTo(2);
+            assertThat(cows2.size()).isEqualTo(2);
+            assertThat(Stream.concat(cows1.stream(), cows2.stream()).toList()).containsExactlyInAnyOrder(cow1, cow2, cow3, cow4);
         });
 
         //removed cows from herd
@@ -184,9 +211,9 @@ public class ShepherdTest extends BasicKafkaTest {
         Stream.of(herder1, herder2).filter(PastureShepherd::isLeaderElected).forEach(PastureShepherd::setNeedsReconfigRebalance);
 
         await().timeout(ofSeconds(5)).untilAsserted(() -> {
-            assertThat(cows1.get().size()).isEqualTo(1);
-            assertThat(cows2.get().size()).isEqualTo(1);
-            assertThat(Stream.concat(cows1.get().stream(), cows2.get().stream()).toList()).containsExactlyInAnyOrder(cow3, cow4);
+            assertThat(cows1.size()).isEqualTo(1);
+            assertThat(cows2.size()).isEqualTo(1);
+            assertThat(Stream.concat(cows1.stream(), cows2.stream()).toList()).containsExactlyInAnyOrder(cow3, cow4);
         });
     }
 

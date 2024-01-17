@@ -100,7 +100,7 @@ public class KafkaFarm implements Farm {
         private Population snapshot;
         private Population latest;
 
-        private int assignedVersion;
+        private int assignedVersion = Integer.MIN_VALUE;
 
         PushHerd(PastureListener<Breed> pastureListener, SerDe<Breed> serDe) {
             this.pastureListener = pastureListener;
@@ -109,6 +109,11 @@ public class KafkaFarm implements Farm {
 
         @Override
         public synchronized void setPopulation(Breed[] population, int version) {
+            //Ignore outdated non-static version
+            if(version >=0 && version <= assignedVersion){
+                return;
+            }
+
             Supplier<Set<ByteBuffer>> latest = memoize(() -> new HashSet<>(serDe.serialize(Arrays.asList(population))));
             if(this.snapshot == null
                     || version >= 0 && version > this.snapshot.getVersion()
@@ -148,6 +153,11 @@ public class KafkaFarm implements Farm {
         public synchronized void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
             this.pastureListener.assigned(serDe.deserialize(population), version, generation, isLeader);
             this.assignedVersion = version;
+        }
+
+        @Override
+        public void cleanup() {
+            this.pastureListener.cleanup();
         }
 
         @Override

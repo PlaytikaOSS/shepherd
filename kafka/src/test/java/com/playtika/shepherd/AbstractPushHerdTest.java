@@ -7,6 +7,7 @@ import com.playtika.shepherd.serde.SerDe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.playtika.shepherd.KafkaFarm.NO_VERSION;
@@ -82,6 +83,30 @@ abstract public class AbstractPushHerdTest<Breed> {
 
         //set update with the new population
         pushHerd.setPopulation(getPopulation1(), NO_VERSION);
+        verify(pastureShepherd).setNeedsReconfigRebalance();
+    }
+
+    @Test
+    public void shouldNotUpdateIfOutdatedVersion(){
+        //set initial population
+        Breed[] population0 = getPopulation0();
+        pushHerd.setPopulation(population0, 0);
+        //no interaction cause not elected as leader
+        verifyNoInteractions(pastureShepherd);
+
+        //called when elected as leader
+        Population population = pushHerd.getPopulation();
+        assertThat(population.getSheep()).containsExactlyElementsOf(
+                getSerDe().serialize(Arrays.asList(population0)));
+        pushHerd.assigned(new ArrayList<>(population.getSheep()), 0, 1, true);
+
+        //set update with the same version
+        Breed[] population1 = getPopulation1();
+        pushHerd.setPopulation(population1, 0);
+        verifyNoInteractions(pastureShepherd);
+
+        //set update with the new population
+        pushHerd.setPopulation(population1, 1);
         verify(pastureShepherd).setNeedsReconfigRebalance();
     }
 
