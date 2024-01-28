@@ -1,6 +1,6 @@
 package com.playtika.shepherd;
 
-import com.playtika.shepherd.common.Pasture;
+import com.playtika.shepherd.common.push.Pasture;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -32,17 +32,17 @@ public class JoinPasture {
 
         Consumer<String, String> consumer = createConsumer();
 
-        KafkaFarm kafkaFarm = new KafkaFarm(kafkaContainer.getBootstrapServers());
+        KafkaPushFarm kafkaPushFarm = new KafkaPushFarm(kafkaContainer.getBootstrapServers());
 
 
-        Pasture<String> skyNet = kafkaFarm.addBreedingPasture("SkyNet", String.class,
+        Pasture<String> skyNet = kafkaPushFarm.addBreedingPasture("SkyNet", String.class,
                 (population, version, generation, isLeader) -> {
                     logger.info("Assigned leader={} version={} [{}]", isLeader, version, population);
                 });
 
 
         System.out.println("****************************************************");
-        System.out.println("*  Joined the Kafka Farm: \n"+kafkaFarm);
+        System.out.println("*  Joined the Kafka Farm: \n"+ kafkaPushFarm);
         System.out.println("*  Herd name: SkyNet");
         System.out.println("****************************************************");
 

@@ -1,4 +1,6 @@
-package com.playtika.shepherd.common;
+package com.playtika.shepherd.common.push;
+
+import com.playtika.shepherd.common.PastureListener;
 
 import java.nio.ByteBuffer;
 

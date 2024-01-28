@@ -1,6 +1,6 @@
 package com.playtika.shepherd;
 
-import com.playtika.shepherd.common.Pasture;
+import com.playtika.shepherd.common.push.Pasture;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
@@ -113,7 +113,7 @@ public class KafkaToxiFarmTest {
     @Test
     public void shouldRestoreBalanceForStaticHerd() throws IOException {
 
-        KafkaFarm kafkaRanch = new KafkaFarm(getBootstrapServers(), TEST_PROPERTIES);
+        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getBootstrapServers(), TEST_PROPERTIES);
 
         ByteBuffer cow1 = ByteBuffer.wrap(new byte[]{1});
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
@@ -129,19 +129,21 @@ public class KafkaToxiFarmTest {
         });
 
         pasture1.getShepherd().setPopulation(cows, -1);
+        pasture1.start();
 
         await().timeout(ofSeconds(5)).untilAsserted(() -> {
             assertThat(cows1.get()).containsExactlyInAnyOrder(cow1, cow2);
         });
 
         //setup toxi pasture
-        KafkaFarm kafkaToxiRanch = new KafkaFarm(getToxiBootstrapServers(), TEST_PROPERTIES);
+        KafkaPushFarm kafkaToxiRanch = new KafkaPushFarm(getToxiBootstrapServers(), TEST_PROPERTIES);
         AtomicReference<List<ByteBuffer>> cows2 = new AtomicReference<>(List.of());
         Pasture<ByteBuffer> pasture2 = kafkaToxiRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
             logger.info("Assigned cows2 [{}]", toBytes(population));
             cows2.set(population);
         });
         pasture2.getShepherd().setPopulation(cows, -1);
+        pasture2.start();
 
         await().timeout(ofSeconds(5)).untilAsserted(() -> {
             assertThat(cows1.get().size()).isEqualTo(1);

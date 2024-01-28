@@ -13,10 +13,10 @@ Thereby it inherits well-known Kafka heartbeat mechanics and its config paramete
 ```java
      
 /* Specify Kafka servers (will be used for rebalance only) */
-KafkaFarm kafkaFarm = new KafkaFarm(kafkaBootstrapServers);
+KafkaPushFarm kafkaPushFarm = new KafkaPushFarm(kafkaBootstrapServers);
 
 /* Join the pasture to herd of specific name and class */
-Pasture<String> skyNet = kafkaFarm.addBreedingPasture("SkyNet", String.class,
+Pasture<String> skyNet = kafkaPushFarm.addBreedingPasture("SkyNet", String.class,
     /* listener that will be use to update local assignment to this pasture */
     (population, version, generation, isLeader) -> {
     logger.info("Assigned leader={} version={} [{}]", isLeader, version, population);
@@ -24,6 +24,8 @@ Pasture<String> skyNet = kafkaFarm.addBreedingPasture("SkyNet", String.class,
 
 /* set global population that will be distributed among all members of this herd */
 skyNet.getShepherd().setPopulation(population, version.intValue())
+
+skyNet.start();
 ```
 
 ### Modules
