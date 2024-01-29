@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.playtika.shepherd.KafkaFarm.NO_VERSION;
+import static com.playtika.shepherd.KafkaPushFarm.NO_VERSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -22,13 +22,13 @@ abstract public class AbstractPushHerdTest<Breed> {
     private final PastureListener<Breed> pastureListener = mock(PastureListener.class);
     private final PastureShepherd pastureShepherd = mock(PastureShepherd.class);
 
-    private KafkaFarm.PushHerd<Breed> pushHerd;
+    private KafkaPushFarm.PushHerd<Breed> pushHerd;
 
     abstract protected SerDe<Breed> getSerDe();
 
     @BeforeEach
     public void setUp(){
-        pushHerd = new KafkaFarm.PushHerd<>(pastureListener, getSerDe());
+        pushHerd = new KafkaPushFarm.PushHerd<>(pastureListener, getSerDe());
         pushHerd.setPastureShepherd(pastureShepherd);
     }
 
@@ -42,7 +42,8 @@ abstract public class AbstractPushHerdTest<Breed> {
     public void shouldCallRebalanceForLeaderOnly(){
         //set initial population
         Breed[] population0 = getPopulation0();
-        pushHerd.setPopulation(population0, -1);
+        boolean rebalance = pushHerd.setPopulation(population0, -1);
+        assertThat(rebalance).isFalse();
         //no interaction cause not elected as leader
         verifyNoInteractions(pastureShepherd);
 
@@ -50,13 +51,15 @@ abstract public class AbstractPushHerdTest<Breed> {
         assertThat(pushHerd.getPopulation().getSheep()).containsExactlyElementsOf(
                 getSerDe().serialize(Arrays.asList(population0)));
 
-        pushHerd.setPopulation(getPopulation1(), 0);
+        rebalance = pushHerd.setPopulation(getPopulation1(), 0);
+        assertThat(rebalance).isTrue();
         //now it triggered rebalance because now it's leader
         verify(pastureShepherd).setNeedsReconfigRebalance();
         reset(pastureShepherd);
 
         Breed[] population2 = getPopulation2();
-        pushHerd.setPopulation(population2, 0);
+        rebalance = pushHerd.setPopulation(population2, 0);
+        assertThat(rebalance).isFalse();
         //consecutive call will not trigger rebalance
         verifyNoInteractions(pastureShepherd);
 
@@ -68,7 +71,8 @@ abstract public class AbstractPushHerdTest<Breed> {
     public void shouldNotUpdateIfTheSamePopulation(){
         //set initial population
         Breed[] population0 = getPopulation0();
-        pushHerd.setPopulation(population0, NO_VERSION);
+        boolean rebalance = pushHerd.setPopulation(population0, NO_VERSION);
+        assertThat(rebalance).isFalse();
         //no interaction cause not elected as leader
         verifyNoInteractions(pastureShepherd);
 
@@ -78,11 +82,13 @@ abstract public class AbstractPushHerdTest<Breed> {
                 getSerDe().serialize(Arrays.asList(population0)));
 
         //set update with the same population
-        pushHerd.setPopulation(population0, NO_VERSION);
+        rebalance = pushHerd.setPopulation(population0, NO_VERSION);
+        assertThat(rebalance).isFalse();
         verifyNoInteractions(pastureShepherd);
 
         //set update with the new population
-        pushHerd.setPopulation(getPopulation1(), NO_VERSION);
+        rebalance = pushHerd.setPopulation(getPopulation1(), NO_VERSION);
+        assertThat(rebalance).isTrue();
         verify(pastureShepherd).setNeedsReconfigRebalance();
     }
 
@@ -90,7 +96,8 @@ abstract public class AbstractPushHerdTest<Breed> {
     public void shouldNotUpdateIfOutdatedVersion(){
         //set initial population
         Breed[] population0 = getPopulation0();
-        pushHerd.setPopulation(population0, 0);
+        boolean rebalance = pushHerd.setPopulation(population0, 0);
+        assertThat(rebalance).isFalse();
         //no interaction cause not elected as leader
         verifyNoInteractions(pastureShepherd);
 
@@ -102,11 +109,13 @@ abstract public class AbstractPushHerdTest<Breed> {
 
         //set update with the same version
         Breed[] population1 = getPopulation1();
-        pushHerd.setPopulation(population1, 0);
+        rebalance = pushHerd.setPopulation(population1, 0);
+        assertThat(rebalance).isFalse();
         verifyNoInteractions(pastureShepherd);
 
         //set update with the new population
-        pushHerd.setPopulation(population1, 1);
+        rebalance = pushHerd.setPopulation(population1, 1);
+        assertThat(rebalance).isTrue();
         verify(pastureShepherd).setNeedsReconfigRebalance();
     }
 
@@ -114,7 +123,8 @@ abstract public class AbstractPushHerdTest<Breed> {
     public void shouldNotUpdateIfTheSameVersion(){
         //set initial population
         Breed[] population0 = getPopulation0();
-        pushHerd.setPopulation(population0, 1);
+        boolean rebalance = pushHerd.setPopulation(population0, 1);
+        assertThat(rebalance).isFalse();
         //no interaction cause not elected as leader
         verifyNoInteractions(pastureShepherd);
 
@@ -124,11 +134,13 @@ abstract public class AbstractPushHerdTest<Breed> {
                 getSerDe().serialize(Arrays.asList(population0)));
 
         //set update with the same version
-        pushHerd.setPopulation(getPopulation1(), 1);
+        rebalance = pushHerd.setPopulation(getPopulation1(), 1);
+        assertThat(rebalance).isFalse();
         verifyNoInteractions(pastureShepherd);
 
         //set update with the new version
-        pushHerd.setPopulation(getPopulation1(), 2);
+        rebalance = pushHerd.setPopulation(getPopulation1(), 2);
+        assertThat(rebalance).isTrue();
         verify(pastureShepherd).setNeedsReconfigRebalance();
     }
 }

@@ -4,6 +4,7 @@ import com.playtika.shepherd.common.PastureListener;
 import org.apache.kafka.common.utils.LogContext;
 import org.apache.kafka.common.utils.Time;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,7 +27,7 @@ public class PastureShepherdBuilder {
 
     private Herd herd;
 
-    private PastureListener rebalanceListener;
+    private PastureListener<ByteBuffer> rebalanceListener;
 
     public PastureShepherd build(){
 
@@ -87,7 +88,7 @@ public class PastureShepherdBuilder {
         return this;
     }
 
-    public PastureShepherdBuilder setRebalanceListener(PastureListener rebalanceListener) {
+    public PastureShepherdBuilder setRebalanceListener(PastureListener<ByteBuffer> rebalanceListener) {
         this.rebalanceListener = rebalanceListener;
         return this;
     }

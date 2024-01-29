@@ -1,16 +1,15 @@
 package com.playtika.shepherd;
 
-import com.playtika.shepherd.common.Farm;
-import com.playtika.shepherd.common.Pasture;
+import com.playtika.shepherd.common.push.Farm;
+import com.playtika.shepherd.common.push.Pasture;
 import com.playtika.shepherd.common.PastureListener;
-import com.playtika.shepherd.common.Shepherd;
+import com.playtika.shepherd.common.push.Shepherd;
 import com.playtika.shepherd.inernal.Herd;
 import com.playtika.shepherd.inernal.PastureShepherd;
 import com.playtika.shepherd.inernal.PastureShepherdBuilder;
 import com.playtika.shepherd.inernal.Population;
 import com.playtika.shepherd.serde.SerDe;
 
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Arrays;
@@ -25,45 +24,33 @@ import static com.playtika.shepherd.inernal.utils.CacheUtils.memoize;
 import static com.playtika.shepherd.serde.SerDeUtils.BYTE_BUFFER_DE_SER;
 import static com.playtika.shepherd.serde.SerDeUtils.getSerDe;
 
-public class KafkaFarm implements Farm {
+public class KafkaPushFarm implements Farm {
 
     public static final int NO_VERSION = -1;
     private final String bootstrapServers;
     private final Map<String, String> properties;
 
-    public KafkaFarm(String bootstrapServers) {
+    public KafkaPushFarm(String bootstrapServers) {
         this(bootstrapServers, Map.of());
     }
 
-    public KafkaFarm(String bootstrapServers, Map<String, String> properties) {
+    public KafkaPushFarm(String bootstrapServers, Map<String, String> properties) {
         this.bootstrapServers = bootstrapServers;
         this.properties = properties;
     }
 
     @Override
     public Pasture<ByteBuffer> addPasture(String herdName, PastureListener<ByteBuffer> pastureListener) {
-        PushHerd<ByteBuffer> pushHerd = new PushHerd<>(pastureListener, BYTE_BUFFER_DE_SER);
-
-        PastureShepherd pastureShepherd = new PastureShepherdBuilder()
-                .setBootstrapServers(bootstrapServers)
-                .setGroupId(herdName)
-                .setProperties(properties)
-                .setRebalanceListener(pushHerd)
-                .setHerd(checked(pushHerd))
-                .build();
-
-        pushHerd.setPastureShepherd(pastureShepherd);
-
-        pushHerd.setPopulation(new ByteBuffer[0], NO_VERSION);
-
-        pastureShepherd.start();
-
-        return pushHerd;
+        return addBreedingPasture(herdName, BYTE_BUFFER_DE_SER, pastureListener);
     }
 
     @Override
     public <Breed> Pasture<Breed> addBreedingPasture(String herdName, Class<Breed> breedClass, PastureListener<Breed> pastureListener) {
-        PushHerd<Breed> pushHerd = new PushHerd<>(pastureListener, getSerDe(breedClass));
+        return addBreedingPasture(herdName, getSerDe(breedClass), pastureListener);
+    }
+
+    private  <Breed> Pasture<Breed> addBreedingPasture(String herdName, SerDe<Breed> serDe, PastureListener<Breed> pastureListener){
+        PushHerd<Breed> pushHerd = new PushHerd<>(pastureListener, serDe);
 
         PastureShepherd pastureShepherd = new PastureShepherdBuilder()
                 .setBootstrapServers(bootstrapServers)
@@ -74,10 +61,6 @@ public class KafkaFarm implements Farm {
                 .build();
 
         pushHerd.setPastureShepherd(pastureShepherd);
-
-        pushHerd.setPopulation((Breed[]) Array.newInstance(breedClass, 0), NO_VERSION);
-
-        pastureShepherd.start();
 
         return pushHerd;
     }
@@ -108,10 +91,10 @@ public class KafkaFarm implements Farm {
         }
 
         @Override
-        public synchronized void setPopulation(Breed[] population, int version) {
+        public synchronized boolean setPopulation(Breed[] population, int version) {
             //Ignore outdated non-static version
             if(version >=0 && version <= assignedVersion){
-                return;
+                return false;
             }
 
             Supplier<Set<ByteBuffer>> latest = memoize(() -> new HashSet<>(serDe.serialize(Arrays.asList(population))));
@@ -119,12 +102,15 @@ public class KafkaFarm implements Farm {
                     || version >= 0 && version > this.snapshot.getVersion()
                     || version < 0 && !this.snapshot.getSheep().equals(latest.get())){
                 this.latest = new Population(latest.get(), version);
-                //call rebalance on leader only
+                //call rebalance on new population for leader only
                 if(snapshot != null){
                     this.snapshot = null;
                     pastureShepherd.setNeedsReconfigRebalance();
+                    return true;
                 }
             }
+
+            return false;
         }
 
         @Override
@@ -163,6 +149,11 @@ public class KafkaFarm implements Farm {
         @Override
         public Shepherd<Breed> getShepherd() {
             return this;
+        }
+
+        @Override
+        public void start() {
+            pastureShepherd.start();
         }
 
         @Override
