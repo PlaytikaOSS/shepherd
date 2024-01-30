@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -37,7 +36,7 @@ public class ShepherdTest extends BasicKafkaTest {
         Herd herd = checked(new Herd() {
             @Override
             public Population getPopulation() {
-                return new Population(Set.of(cow1, cow2), -1);
+                return new Population(List.of(cow1, cow2), -1);
             }
 
             @Override
@@ -49,7 +48,7 @@ public class ShepherdTest extends BasicKafkaTest {
         LinkedBlockingQueue<ByteBuffer> cows1 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener1 = new PastureListener<>() {
             @Override
-            public void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
+            public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
                 logger.info("Assigned cows1 [{}]", toBytes(population));
                 cows1.addAll(population);
             }
@@ -78,7 +77,7 @@ public class ShepherdTest extends BasicKafkaTest {
         LinkedBlockingQueue<ByteBuffer> cows2 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener2 = new PastureListener<>() {
             @Override
-            public void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
+            public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
                 logger.info("Assigned cows2 [{}]", toBytes(population));
                 cows2.addAll(population);
             }
@@ -119,8 +118,7 @@ public class ShepherdTest extends BasicKafkaTest {
 
         ByteBuffer cow1 = ByteBuffer.wrap(new byte[]{1});
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
-        Set<ByteBuffer> population = ConcurrentHashMap.newKeySet();
-        population.addAll(List.of(cow1, cow2));
+        List<ByteBuffer> population = new CopyOnWriteArrayList<>(List.of(cow1, cow2));
         AtomicInteger version = new AtomicInteger(1);
 
         Herd herd = checked(new Herd() {
@@ -137,7 +135,7 @@ public class ShepherdTest extends BasicKafkaTest {
         LinkedBlockingQueue<ByteBuffer> cows1 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener1 = new PastureListener<>() {
             @Override
-            public void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
+            public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
                 logger.info("Assigned cows1 [{}]", toBytes(population));
                 cows1.addAll(population);
             }
@@ -161,7 +159,7 @@ public class ShepherdTest extends BasicKafkaTest {
         LinkedBlockingQueue<ByteBuffer> cows2 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener2 = new PastureListener<>() {
             @Override
-            public void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
+            public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
                 logger.info("Assigned cows2 [{}]", toBytes(population));
                 cows2.addAll(population);
             }

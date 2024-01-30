@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -112,7 +112,7 @@ public class KafkaPullFarmTest extends BasicKafkaTest{
         int ver1 = nextVersion(0, versioned);
 
         AtomicReference<List<ByteBuffer>> cows1 = new AtomicReference<>(List.of());
-        AtomicInteger version1 = new AtomicInteger();
+        AtomicLong version1 = new AtomicLong();
         Pasture pasture1 = kafkaRanch.addPasture(herd, (population, version, generation, isLeader) -> {
             logPopulation(1, population, version, isLeader);
             cows1.set(population);
@@ -122,7 +122,7 @@ public class KafkaPullFarmTest extends BasicKafkaTest{
         pasture1.start();
 
         AtomicReference<List<ByteBuffer>> cows2 = new AtomicReference<>(List.of());
-        AtomicInteger version2 = new AtomicInteger();
+        AtomicLong version2 = new AtomicLong();
         Pasture pasture2 = kafkaRanch.addPasture(herd, (population, version, generation, isLeader) -> {
             logPopulation(2, population, version, isLeader);
             cows2.set(population);
@@ -253,7 +253,7 @@ public class KafkaPullFarmTest extends BasicKafkaTest{
         });
     }
 
-    private static void logPopulation(int pastureIndex, List<ByteBuffer> population, int version, boolean isLeader) {
+    private static void logPopulation(int pastureIndex, List<ByteBuffer> population, long version, boolean isLeader) {
         logger.info("Assigned to pasture{} leader={} version={} [{}]", pastureIndex, isLeader, version, toBytes(population));
     }
 

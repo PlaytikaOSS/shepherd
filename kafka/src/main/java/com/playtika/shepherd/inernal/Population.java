@@ -1,23 +1,23 @@
 package com.playtika.shepherd.inernal;
 
 import java.nio.ByteBuffer;
-import java.util.Set;
+import java.util.List;
 
 public class Population {
 
-    private final Set<ByteBuffer> sheep;
-    private final int version;
+    private final List<ByteBuffer> sheep;
+    private final long version;
 
-    public Population(Set<ByteBuffer> sheep, int version) {
+    public Population(List<ByteBuffer> sheep, long version) {
         this.sheep = sheep;
         this.version = version;
     }
 
-    public Set<ByteBuffer> getSheep() {
+    public List<ByteBuffer> getSheep() {
         return sheep;
     }
 
-    public int getVersion() {
+    public long getVersion() {
         return version;
     }
 }

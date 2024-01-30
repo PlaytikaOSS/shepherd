@@ -191,10 +191,10 @@ public class PastureCoordinator extends AbstractCoordinator {
         Assignment newAssignment = deserializeAssignment(decompress(memberAssignment));
         if(logger.isDebugEnabled()){
             logger.debug("Received new assignment version: {}, generation: {}, memberId: {}\nassigned: [{}]",
-                    newAssignment.getVersion(), generation, memberId, toBytes(newAssignment.getAssigned()));
+                    newAssignment.version(), generation, memberId, toBytes(newAssignment.assigned()));
         } else {
             logger.info("Received new assignment version: {}, generation: {}, memberId: {}",
-                    newAssignment.getVersion(), generation, memberId);
+                    newAssignment.version(), generation, memberId);
         }
         // At this point we always consider ourselves to be a member of the cluster, even if there was an assignment
         // error (the leader couldn't make the assignment) or we are behind the config and cannot yet work on our assigned
@@ -203,7 +203,7 @@ public class PastureCoordinator extends AbstractCoordinator {
         rejoinRequested = false;
         assignmentSnapshot = newAssignment;
         lastCompletedGenerationId = generation;
-        listener.assigned(newAssignment.getAssigned(), newAssignment.getVersion(), generation, isLeader(newAssignment));
+        listener.assigned(newAssignment.assigned(), newAssignment.version(), generation, isLeader(newAssignment));
     }
 
     @Override
@@ -245,7 +245,7 @@ public class PastureCoordinator extends AbstractCoordinator {
     }
 
     private boolean isLeader(Assignment assignment) {
-        return memberId().equals(assignment.getLeader());
+        return memberId().equals(assignment.leader());
     }
 
 

@@ -13,6 +13,6 @@ public interface Shepherd<Breed> {
      * @return true if it will cause rebalance, false if population will be ignored
      */
 
-    boolean setPopulation(Breed[] population, int version);
+    boolean setPopulation(Breed[] population, long version);
 
 }
