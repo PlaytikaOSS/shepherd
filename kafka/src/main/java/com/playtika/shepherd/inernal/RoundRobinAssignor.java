@@ -4,11 +4,9 @@ import org.apache.kafka.common.message.JoinGroupResponseData;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.playtika.shepherd.inernal.ProtocolHelper.compress;
 import static com.playtika.shepherd.inernal.ProtocolHelper.serializeAssignment;
@@ -20,13 +18,10 @@ public class RoundRobinAssignor implements Assignor {
 
     @Override
     public Map<String, ByteBuffer> performAssignment(
-            String leaderId, String protocol, Set<ByteBuffer> population, int version,
+            String leaderId, String protocol, List<ByteBuffer> population, long version,
             List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata) {
 
-        ArrayList<ByteBuffer> herd = new ArrayList<>(population);
-        Collections.sort(herd);
-
-        int herdSize = herd.size();
+        int herdSize = population.size();
         int pasturesCount = allMemberMetadata.size();
         int sheepPerPasture = herdSize / pasturesCount + 1;
 
@@ -35,7 +30,7 @@ public class RoundRobinAssignor implements Assignor {
                 .toList();
 
         for(int sheepId = 0; sheepId < herdSize; sheepId++){
-            assignments.get(sheepId % pasturesCount).getAssigned().add(herd.get(sheepId));
+            assignments.get(sheepId % pasturesCount).assigned().add(population.get(sheepId));
         }
 
         Map<String, ByteBuffer> assignmentsMap = new HashMap<>(assignments.size());

@@ -12,6 +12,6 @@ public interface Herd<Breed> {
 
     void reset();
 
-    record Population<Breed>(Breed[] population, int version) {
+    record Population<Breed>(Breed[] population, long version) {
     }
 }

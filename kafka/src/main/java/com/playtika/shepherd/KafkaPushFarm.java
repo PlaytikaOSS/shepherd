@@ -1,8 +1,8 @@
 package com.playtika.shepherd;
 
+import com.playtika.shepherd.common.PastureListener;
 import com.playtika.shepherd.common.push.Farm;
 import com.playtika.shepherd.common.push.Pasture;
-import com.playtika.shepherd.common.PastureListener;
 import com.playtika.shepherd.common.push.Shepherd;
 import com.playtika.shepherd.inernal.Herd;
 import com.playtika.shepherd.inernal.PastureShepherd;
@@ -13,10 +13,8 @@ import com.playtika.shepherd.serde.SerDe;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.playtika.shepherd.inernal.CheckedHerd.checked;
@@ -83,7 +81,7 @@ public class KafkaPushFarm implements Farm {
         private Population snapshot;
         private Population latest;
 
-        private int assignedVersion = Integer.MIN_VALUE;
+        private long assignedVersion = Long.MIN_VALUE;
 
         PushHerd(PastureListener<Breed> pastureListener, SerDe<Breed> serDe) {
             this.pastureListener = pastureListener;
@@ -91,13 +89,13 @@ public class KafkaPushFarm implements Farm {
         }
 
         @Override
-        public synchronized boolean setPopulation(Breed[] population, int version) {
+        public synchronized boolean setPopulation(Breed[] population, long version) {
             //Ignore outdated non-static version
             if(version >=0 && version <= assignedVersion){
                 return false;
             }
 
-            Supplier<Set<ByteBuffer>> latest = memoize(() -> new HashSet<>(serDe.serialize(Arrays.asList(population))));
+            Supplier<List<ByteBuffer>> latest = memoize(() -> serDe.serialize(Arrays.asList(population)));
             if(this.snapshot == null
                     || version >= 0 && version > this.snapshot.getVersion()
                     || version < 0 && !this.snapshot.getSheep().equals(latest.get())){
@@ -136,7 +134,7 @@ public class KafkaPushFarm implements Farm {
         }
 
         @Override
-        public synchronized void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
+        public synchronized void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
             this.pastureListener.assigned(serDe.deserialize(population), version, generation, isLeader);
             this.assignedVersion = version;
         }

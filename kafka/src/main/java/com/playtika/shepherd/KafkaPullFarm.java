@@ -12,7 +12,6 @@ import com.playtika.shepherd.serde.SerDe;
 
 import java.nio.ByteBuffer;
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +75,7 @@ public class KafkaPullFarm implements Farm {
         @Override
         public Population getPopulation() {
             Herd.Population<Breed> population = herd.getPopulation();
-            return new Population(new HashSet<>(serDe.serialize(List.of(population.population()))), population.version());
+            return new Population(serDe.serialize(List.of(population.population())), population.version());
         }
 
         @Override
@@ -107,7 +106,7 @@ public class KafkaPullFarm implements Farm {
         }
 
         @Override
-        public void assigned(List<ByteBuffer> population, int version, int generation, boolean isLeader) {
+        public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
             pastureListener.assigned(serDe.deserialize(population), version, generation, isLeader);
         }
 

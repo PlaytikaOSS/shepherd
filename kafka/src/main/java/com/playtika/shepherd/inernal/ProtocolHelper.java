@@ -26,7 +26,7 @@ public class ProtocolHelper {
 
     public static final Schema ASSIGNMENT_V0 = new Schema(
             new Field(LEADER_KEY_NAME, Type.STRING),
-            new Field(VERSION_KEY_NAME, Type.INT32),
+            new Field(VERSION_KEY_NAME, Type.INT64),
             new Field(ASSIGNED_KEY_NAME, new ArrayOf(BYTES)));
     public static final int COMPRESSION_LEVEL = 17;
 
@@ -48,9 +48,9 @@ public class ProtocolHelper {
 
     public static ByteBuffer serializeAssignment(Assignment assignment) {
         Struct struct = new Struct(ASSIGNMENT_V0);
-        struct.set(LEADER_KEY_NAME, assignment.getLeader());
-        struct.set(VERSION_KEY_NAME, assignment.getVersion());
-        struct.set(ASSIGNED_KEY_NAME, assignment.getAssigned().toArray());
+        struct.set(LEADER_KEY_NAME, assignment.leader());
+        struct.set(VERSION_KEY_NAME, assignment.version());
+        struct.set(ASSIGNED_KEY_NAME, assignment.assigned().toArray());
 
         ByteBuffer buffer = ByteBuffer.allocate(ASSIGNMENT_V0.sizeOf(struct));
         ASSIGNMENT_V0.write(buffer, struct);
@@ -61,7 +61,7 @@ public class ProtocolHelper {
     public static Assignment deserializeAssignment(ByteBuffer buffer) {
         Struct struct = ASSIGNMENT_V0.read(buffer);
         String leader = struct.getString(LEADER_KEY_NAME);
-        int version = struct.getInt(VERSION_KEY_NAME);
+        long version = struct.getLong(VERSION_KEY_NAME);
         List<ByteBuffer> assigned = new ArrayList<>();
         for (Object element : struct.getArray(ASSIGNED_KEY_NAME)) {
             assigned.add((ByteBuffer) element);
