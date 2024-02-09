@@ -9,6 +9,7 @@ import com.playtika.shepherd.inernal.PastureShepherd;
 import com.playtika.shepherd.inernal.PastureShepherdBuilder;
 import com.playtika.shepherd.inernal.Population;
 import com.playtika.shepherd.serde.SerDe;
+import org.apache.kafka.common.message.JoinGroupResponseData;
 
 import java.nio.ByteBuffer;
 import java.time.Duration;
@@ -73,8 +74,8 @@ public class KafkaPullFarm implements Farm {
         }
 
         @Override
-        public Population getPopulation() {
-            Herd.Population<Breed> population = herd.getPopulation();
+        public Population getPopulation(List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata) {
+            Herd.Population<Breed> population = herd.getPopulation(allMemberMetadata.size());
             return new Population(serDe.serialize(List.of(population.population())), population.version());
         }
 

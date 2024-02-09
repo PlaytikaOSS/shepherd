@@ -273,7 +273,7 @@ public class KafkaPullFarmTest extends BasicKafkaTest{
         }
 
         @Override
-        public Population<Breed> getPopulation() {
+        public Population<Breed> getPopulation(int pasturesCount) {
             return populationGlobal.get();
         }
 

@@ -1,5 +1,9 @@
 package com.playtika.shepherd.inernal;
 
+import org.apache.kafka.common.message.JoinGroupResponseData;
+
+import java.util.List;
+
 public class CheckedHerd implements Herd {
 
     private final Herd herd;
@@ -14,12 +18,12 @@ public class CheckedHerd implements Herd {
     }
 
     @Override
-    public Population getPopulation(){
+    public Population getPopulation(List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata){
         if(requested){
             throw new IllegalStateException("Should be called only once on rebalance");
         }
         try {
-            return herd.getPopulation();
+            return herd.getPopulation(allMemberMetadata);
         } finally {
             requested = true;
         }
