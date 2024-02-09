@@ -8,7 +8,7 @@ public interface Herd<Breed> {
 
     String getName();
 
-    Population<Breed> getPopulation();
+    Population<Breed> getPopulation(int pasturesCount);
 
     void reset();
 

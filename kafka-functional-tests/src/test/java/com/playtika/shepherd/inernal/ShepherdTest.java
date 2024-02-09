@@ -2,6 +2,7 @@ package com.playtika.shepherd.inernal;
 
 import com.playtika.shepherd.BasicKafkaTest;
 import com.playtika.shepherd.common.PastureListener;
+import org.apache.kafka.common.message.JoinGroupResponseData;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,12 @@ public class ShepherdTest extends BasicKafkaTest {
 
         ByteBuffer cow1 = ByteBuffer.wrap(new byte[]{1});
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
+        AtomicInteger pasturesCountParameter = new AtomicInteger();
 
         Herd herd = checked(new Herd() {
             @Override
-            public Population getPopulation() {
+            public Population getPopulation(List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata) {
+                pasturesCountParameter.set(allMemberMetadata.size());
                 return new Population(List.of(cow1, cow2), -1);
             }
 
@@ -71,6 +74,7 @@ public class ShepherdTest extends BasicKafkaTest {
 
         await().timeout(ofSeconds(5)).untilAsserted(() -> {
             assertThat(cows1).containsExactlyInAnyOrder(cow1, cow2);
+            assertThat(pasturesCountParameter.get()).isEqualTo(1);
         });
 
         //setup another pasture
@@ -100,6 +104,7 @@ public class ShepherdTest extends BasicKafkaTest {
         await().timeout(ofSeconds(5)).untilAsserted(() -> {
             assertThat(cows1.size()).isEqualTo(1);
             assertThat(cows2.size()).isEqualTo(1);
+            assertThat(pasturesCountParameter.get()).isEqualTo(2);
         });
 
         //stop first pasture
@@ -107,6 +112,7 @@ public class ShepherdTest extends BasicKafkaTest {
 
         await().timeout(ofSeconds(3)).untilAsserted(() -> {
             assertThat(cows2).containsExactlyInAnyOrder(cow1, cow2);
+            assertThat(pasturesCountParameter.get()).isEqualTo(1);
         });
 
     }
@@ -120,10 +126,12 @@ public class ShepherdTest extends BasicKafkaTest {
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
         List<ByteBuffer> population = new CopyOnWriteArrayList<>(List.of(cow1, cow2));
         AtomicInteger version = new AtomicInteger(1);
+        AtomicInteger pasturesCountParameter = new AtomicInteger();
 
         Herd herd = checked(new Herd() {
             @Override
-            public Population getPopulation() {
+            public Population getPopulation(List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata) {
+                pasturesCountParameter.set(allMemberMetadata.size());
                 return new Population(population, version.get());
             }
 
@@ -185,6 +193,7 @@ public class ShepherdTest extends BasicKafkaTest {
             assertThat(cows1.size()).isEqualTo(1);
             assertThat(cows2.size()).isEqualTo(1);
             assertThat(Stream.concat(cows1.stream(), cows2.stream()).toList()).containsExactlyInAnyOrder(cow1, cow2);
+            assertThat(pasturesCountParameter.get()).isEqualTo(2);
         });
 
         //add cows to herd

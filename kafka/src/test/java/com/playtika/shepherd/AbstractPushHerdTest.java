@@ -48,7 +48,7 @@ abstract public class AbstractPushHerdTest<Breed> {
         verifyNoInteractions(pastureShepherd);
 
         //called when elected as leader
-        assertThat(pushHerd.getPopulation().getSheep()).containsExactlyElementsOf(
+        assertThat(pushHerd.getPopulation(null).getSheep()).containsExactlyElementsOf(
                 getSerDe().serialize(Arrays.asList(population0)));
 
         rebalance = pushHerd.setPopulation(getPopulation1(), 0);
@@ -63,7 +63,7 @@ abstract public class AbstractPushHerdTest<Breed> {
         //consecutive call will not trigger rebalance
         verifyNoInteractions(pastureShepherd);
 
-        assertThat(pushHerd.getPopulation().getSheep()).containsExactlyElementsOf(
+        assertThat(pushHerd.getPopulation(null).getSheep()).containsExactlyElementsOf(
                 getSerDe().serialize(Arrays.asList(population2)));
     }
 
@@ -77,7 +77,7 @@ abstract public class AbstractPushHerdTest<Breed> {
         verifyNoInteractions(pastureShepherd);
 
         //called when elected as leader
-        Population population = pushHerd.getPopulation();
+        Population population = pushHerd.getPopulation(null);
         assertThat(population.getSheep()).containsExactlyElementsOf(
                 getSerDe().serialize(Arrays.asList(population0)));
 
@@ -102,7 +102,7 @@ abstract public class AbstractPushHerdTest<Breed> {
         verifyNoInteractions(pastureShepherd);
 
         //called when elected as leader
-        Population population = pushHerd.getPopulation();
+        Population population = pushHerd.getPopulation(null);
         assertThat(population.getSheep()).containsExactlyElementsOf(
                 getSerDe().serialize(Arrays.asList(population0)));
         pushHerd.assigned(new ArrayList<>(population.getSheep()), 0, 1, true);
@@ -129,7 +129,7 @@ abstract public class AbstractPushHerdTest<Breed> {
         verifyNoInteractions(pastureShepherd);
 
         //called when elected as leader
-        Population population = pushHerd.getPopulation();
+        Population population = pushHerd.getPopulation(null);
         assertThat(population.getSheep()).containsExactlyElementsOf(
                 getSerDe().serialize(Arrays.asList(population0)));
 

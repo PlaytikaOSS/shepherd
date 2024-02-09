@@ -9,6 +9,7 @@ import com.playtika.shepherd.inernal.PastureShepherd;
 import com.playtika.shepherd.inernal.PastureShepherdBuilder;
 import com.playtika.shepherd.inernal.Population;
 import com.playtika.shepherd.serde.SerDe;
+import org.apache.kafka.common.message.JoinGroupResponseData;
 
 import java.nio.ByteBuffer;
 import java.time.Duration;
@@ -112,7 +113,7 @@ public class KafkaPushFarm implements Farm {
         }
 
         @Override
-        public synchronized Population getPopulation() {
+        public synchronized Population getPopulation(List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata) {
             if(snapshot != null){
                 throw new IllegalStateException("Should be called only once on rebalance");
             }

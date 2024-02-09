@@ -176,7 +176,7 @@ public class PastureCoordinator extends AbstractCoordinator {
         if (skipAssignment)
             throw new IllegalStateException("Can't skip assignment because static membership is not supported.");
 
-        Population population = herd.getPopulation();
+        Population population = herd.getPopulation(allMemberMetadata);
         leaderElected = leaderId;
 
         logger.info("Will rebalance population: [{}]", toBytes(population.getSheep()));
