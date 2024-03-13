@@ -1,5 +1,6 @@
 package com.playtika.shepherd;
 
+import com.playtika.shepherd.common.AssignmentData;
 import com.playtika.shepherd.common.PastureListener;
 import com.playtika.shepherd.inernal.PastureShepherd;
 import com.playtika.shepherd.inernal.Population;
@@ -105,7 +106,8 @@ abstract public class AbstractPushHerdTest<Breed> {
         Population population = pushHerd.getPopulation(null);
         assertThat(population.getSheep()).containsExactlyElementsOf(
                 getSerDe().serialize(Arrays.asList(population0)));
-        pushHerd.assigned(new ArrayList<>(population.getSheep()), 0, 1, true);
+        pushHerd.assigned(new ArrayList<>(population.getSheep()),
+                new AssignmentData(0,"test-member-id", 1,  true));
 
         //set update with the same version
         Breed[] population1 = getPopulation1();

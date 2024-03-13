@@ -1,5 +1,6 @@
 package com.playtika.shepherd;
 
+import com.playtika.shepherd.common.AssignmentData;
 import com.playtika.shepherd.common.PastureListener;
 import com.playtika.shepherd.common.pull.Farm;
 import com.playtika.shepherd.common.pull.Herd;
@@ -106,8 +107,8 @@ public class KafkaPullFarm implements Farm {
         }
 
         @Override
-        public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
-            pastureListener.assigned(serDe.deserialize(population), version, generation, isLeader);
+        public void assigned(List<ByteBuffer> population, AssignmentData assignmentData) {
+            pastureListener.assigned(serDe.deserialize(population), assignmentData);
         }
 
         @Override

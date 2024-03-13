@@ -16,6 +16,7 @@
  */
 package com.playtika.shepherd.inernal;
 
+import com.playtika.shepherd.common.AssignmentData;
 import com.playtika.shepherd.common.PastureListener;
 import org.apache.kafka.clients.GroupRebalanceConfig;
 import org.apache.kafka.clients.consumer.internals.AbstractCoordinator;
@@ -122,7 +123,7 @@ public class PastureCoordinator extends AbstractCoordinator {
                     if (assignmentSnapshot != null) {
                         logger.info("Broker coordinator was unreachable for {}ms. Revoking previous assignment {} to " +
                                 "avoid running tasks while not being a member the group", coordinatorDiscoveryTimeoutMs, assignmentSnapshot);
-                        listener.assigned(List.of(), -1, - generationId(), false);
+                        listener.assigned(List.of(), new AssignmentData(-1, memberId(), - generationId(),  false));
                         assignmentSnapshot = null;
                     }
                 }
@@ -229,7 +230,8 @@ public class PastureCoordinator extends AbstractCoordinator {
         rejoinRequested = false;
         assignmentSnapshot = newAssignment;
         lastCompletedGenerationId = generation;
-        listener.assigned(newAssignment.assigned(), newAssignment.version(), generation, isLeader(newAssignment));
+        listener.assigned(newAssignment.assigned(),
+                new AssignmentData(newAssignment.version(), memberId, generation, isLeader(newAssignment)));
     }
 
     @Override

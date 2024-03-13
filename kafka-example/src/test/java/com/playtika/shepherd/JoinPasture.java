@@ -36,8 +36,8 @@ public class JoinPasture {
 
 
         Pasture<String> skyNet = kafkaPushFarm.addBreedingPasture("SkyNet", String.class,
-                (population, version, generation, isLeader) -> {
-                    logger.info("Assigned leader={} version={} [{}]", isLeader, version, population);
+                (population, assignmentData) -> {
+                    logger.info("Assigned assignmentData={} [{}]", assignmentData, population);
                 });
 
 

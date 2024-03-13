@@ -1,6 +1,7 @@
 package com.playtika.shepherd;
 
 import com.playtika.shepherd.common.PastureListener;
+import com.playtika.shepherd.common.AssignmentData;
 import com.playtika.shepherd.common.push.Farm;
 import com.playtika.shepherd.common.push.Pasture;
 import com.playtika.shepherd.common.push.Shepherd;
@@ -134,9 +135,9 @@ public class KafkaPushFarm implements Farm {
         }
 
         @Override
-        public synchronized void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
-            this.pastureListener.assigned(serDe.deserialize(population), version, generation, isLeader);
-            this.assignedVersion = version;
+        public synchronized void assigned(List<ByteBuffer> population, AssignmentData assignmentData) {
+            this.pastureListener.assigned(serDe.deserialize(population), assignmentData);
+            this.assignedVersion = assignmentData.populationVersion();
         }
 
         @Override

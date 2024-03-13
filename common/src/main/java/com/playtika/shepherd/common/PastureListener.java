@@ -12,7 +12,7 @@ public interface PastureListener<Breed> {
     /**
      * Invoked when new subpopulation assigned to this pasture
      */
-    void assigned(List<Breed> population, long version, int generation, boolean isLeader);
+    void assigned(List<Breed> population, AssignmentData populationAssignment);
 
     /**
      * Invoked on first phase of rebalance
