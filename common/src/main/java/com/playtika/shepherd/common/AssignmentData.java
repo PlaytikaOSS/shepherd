@@ -1,6 +1,6 @@
 package com.playtika.shepherd.common;
 
 public record AssignmentData(
-        long populationVersion,
+        int assignmentSize, long populationVersion,
         String memberId, int generation, boolean isLeader) {
 }
