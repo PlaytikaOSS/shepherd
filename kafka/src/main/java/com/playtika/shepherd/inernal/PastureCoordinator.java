@@ -123,7 +123,8 @@ public class PastureCoordinator extends AbstractCoordinator {
                     if (assignmentSnapshot != null) {
                         logger.info("Broker coordinator was unreachable for {}ms. Revoking previous assignment {} to " +
                                 "avoid running tasks while not being a member the group", coordinatorDiscoveryTimeoutMs, assignmentSnapshot);
-                        listener.assigned(List.of(), new AssignmentData(-1, memberId(), - generationId(),  false));
+                        listener.assigned(List.of(), new AssignmentData(
+                                0, -1, memberId(), - generationId(),  false));
                         assignmentSnapshot = null;
                     }
                 }
@@ -231,7 +232,8 @@ public class PastureCoordinator extends AbstractCoordinator {
         assignmentSnapshot = newAssignment;
         lastCompletedGenerationId = generation;
         listener.assigned(newAssignment.assigned(),
-                new AssignmentData(newAssignment.version(), memberId, generation, isLeader(newAssignment)));
+                new AssignmentData(newAssignment.assigned().size(), newAssignment.version(),
+                        memberId, generation, isLeader(newAssignment)));
     }
 
     @Override

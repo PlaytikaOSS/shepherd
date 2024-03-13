@@ -107,7 +107,7 @@ abstract public class AbstractPushHerdTest<Breed> {
         assertThat(population.getSheep()).containsExactlyElementsOf(
                 getSerDe().serialize(Arrays.asList(population0)));
         pushHerd.assigned(new ArrayList<>(population.getSheep()),
-                new AssignmentData(0,"test-member-id", 1,  true));
+                new AssignmentData(0,0,"test-member-id", 1,  true));
 
         //set update with the same version
         Breed[] population1 = getPopulation1();
