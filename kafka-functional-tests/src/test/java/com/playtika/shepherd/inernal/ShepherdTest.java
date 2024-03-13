@@ -1,6 +1,7 @@
 package com.playtika.shepherd.inernal;
 
 import com.playtika.shepherd.BasicKafkaTest;
+import com.playtika.shepherd.common.AssignmentData;
 import com.playtika.shepherd.common.PastureListener;
 import org.apache.kafka.common.message.JoinGroupResponseData;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ public class ShepherdTest extends BasicKafkaTest {
         LinkedBlockingQueue<ByteBuffer> cows1 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener1 = new PastureListener<>() {
             @Override
-            public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
+            public void assigned(List<ByteBuffer> population, AssignmentData assignmentData) {
                 logger.info("Assigned cows1 [{}]", toBytes(population));
                 cows1.addAll(population);
             }
@@ -80,7 +81,7 @@ public class ShepherdTest extends BasicKafkaTest {
         LinkedBlockingQueue<ByteBuffer> cows2 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener2 = new PastureListener<>() {
             @Override
-            public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
+            public void assigned(List<ByteBuffer> population, AssignmentData assignmentData) {
                 logger.info("Assigned cows2 [{}]", toBytes(population));
                 cows2.addAll(population);
             }
@@ -142,7 +143,7 @@ public class ShepherdTest extends BasicKafkaTest {
         LinkedBlockingQueue<ByteBuffer> cows1 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener1 = new PastureListener<>() {
             @Override
-            public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
+            public void assigned(List<ByteBuffer> population, AssignmentData assignmentData) {
                 logger.info("Assigned cows1 [{}]", toBytes(population));
                 cows1.addAll(population);
             }
@@ -166,7 +167,7 @@ public class ShepherdTest extends BasicKafkaTest {
         LinkedBlockingQueue<ByteBuffer> cows2 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener2 = new PastureListener<>() {
             @Override
-            public void assigned(List<ByteBuffer> population, long version, int generation, boolean isLeader) {
+            public void assigned(List<ByteBuffer> population, AssignmentData assignmentData) {
                 logger.info("Assigned cows2 [{}]", toBytes(population));
                 cows2.addAll(population);
             }

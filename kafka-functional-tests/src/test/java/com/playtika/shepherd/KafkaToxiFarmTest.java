@@ -123,7 +123,7 @@ public class KafkaToxiFarmTest {
         AtomicReference<List<ByteBuffer>> cows1 = new AtomicReference<>(List.of());
 
         String herdName = "static-herd";
-        Pasture<ByteBuffer> pasture1 = kafkaRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
+        Pasture<ByteBuffer> pasture1 = kafkaRanch.addPasture(herdName, (population, assignmentData) -> {
             logger.info("Assigned cows1 [{}]", toBytes(population));
             cows1.set(population);
         });
@@ -138,7 +138,7 @@ public class KafkaToxiFarmTest {
         //setup toxi pasture
         KafkaPushFarm kafkaToxiRanch = new KafkaPushFarm(getToxiBootstrapServers(), TEST_PROPERTIES);
         AtomicReference<List<ByteBuffer>> cows2 = new AtomicReference<>(List.of());
-        Pasture<ByteBuffer> pasture2 = kafkaToxiRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
+        Pasture<ByteBuffer> pasture2 = kafkaToxiRanch.addPasture(herdName, (population, assignmentData) -> {
             logger.info("Assigned cows2 [{}]", toBytes(population));
             cows2.set(population);
         });

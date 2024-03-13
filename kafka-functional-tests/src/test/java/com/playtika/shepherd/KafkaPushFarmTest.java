@@ -1,5 +1,6 @@
 package com.playtika.shepherd;
 
+import com.playtika.shepherd.common.AssignmentData;
 import com.playtika.shepherd.common.push.Pasture;
 import com.playtika.shepherd.common.push.Shepherd;
 import org.junit.jupiter.api.Test;
@@ -37,8 +38,8 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
         AtomicReference<List<ByteBuffer>> cows1 = new AtomicReference<>(List.of());
 
         String herdName = "push-static-herd";
-        Pasture<ByteBuffer> pasture1 = kafkaRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
-            logPopulation(1, population, version, isLeader);
+        Pasture<ByteBuffer> pasture1 = kafkaRanch.addPasture(herdName, (population, assignmentData) -> {
+            logPopulation(1, population, assignmentData);
             cows1.set(population);
         });
 
@@ -51,8 +52,8 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
 
         //setup another pasture
         AtomicReference<List<ByteBuffer>> cows2 = new AtomicReference<>(List.of());
-        Pasture<ByteBuffer> pasture2 = kafkaRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
-            logPopulation(2, population, version, isLeader);
+        Pasture<ByteBuffer> pasture2 = kafkaRanch.addPasture(herdName, (population, assignmentData) -> {
+            logPopulation(2, population, assignmentData);
             cows2.set(population);
         });
         pasture2.getShepherd().setPopulation(cows, -1);
@@ -65,8 +66,8 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
 
         //setup third pasture
         AtomicReference<List<ByteBuffer>> cows3 = new AtomicReference<>(List.of());
-        Pasture<ByteBuffer> pasture3 = kafkaRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
-            logPopulation(3, population, version, isLeader);
+        Pasture<ByteBuffer> pasture3 = kafkaRanch.addPasture(herdName, (population, assignmentData) -> {
+            logPopulation(3, population, assignmentData);
             cows3.set(population);
         });
         pasture3.getShepherd().setPopulation(cows, -1);
@@ -113,20 +114,20 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
         AtomicReference<List<ByteBuffer>> cows1 = new AtomicReference<>(List.of());
         AtomicLong version1 = new AtomicLong();
         String herdName = versioned ? "push-dynamic-group-versioned" : "push-dynamic-group";
-        Pasture<ByteBuffer> pasture1 = kafkaRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
-            logPopulation(1, population, version, isLeader);
+        Pasture<ByteBuffer> pasture1 = kafkaRanch.addPasture(herdName, (population, assignmentData) -> {
+            logPopulation(1, population, assignmentData);
             cows1.set(population);
-            version1.set(version);
+            version1.set(assignmentData.populationVersion());
         });
         pasture1.getShepherd().setPopulation(cows, ver1);
         pasture1.start();
 
         AtomicReference<List<ByteBuffer>> cows2 = new AtomicReference<>(List.of());
         AtomicLong version2 = new AtomicLong();
-        Pasture<ByteBuffer> pasture2 = kafkaRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
-            logPopulation(2, population, version, isLeader);
+        Pasture<ByteBuffer> pasture2 = kafkaRanch.addPasture(herdName, (population, assignmentData) -> {
+            logPopulation(2, population, assignmentData);
             cows2.set(population);
-            version2.set(version);
+            version2.set(assignmentData.populationVersion());
         });
         pasture2.getShepherd().setPopulation(cows, ver1);
         pasture2.start();
@@ -212,16 +213,16 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
 
         AtomicReference<List<ByteBuffer>> cows1 = new AtomicReference<>(List.of());
         String herdName = "push-random-group";
-        Pasture<ByteBuffer> pasture1 = kafkaRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
-            logPopulation(1, population, version, isLeader);
+        Pasture<ByteBuffer> pasture1 = kafkaRanch.addPasture(herdName, (population, assignmentData) -> {
+            logPopulation(1, population, assignmentData);
             cows1.set(population);
         });
         pasture1.getShepherd().setPopulation(new ByteBuffer[]{}, 0);
         pasture1.start();
 
         AtomicReference<List<ByteBuffer>> cows2 = new AtomicReference<>(List.of());
-        Pasture<ByteBuffer> pasture2 = kafkaRanch.addPasture(herdName, (population, version, generation, isLeader) -> {
-            logPopulation(2, population, version, isLeader);
+        Pasture<ByteBuffer> pasture2 = kafkaRanch.addPasture(herdName, (population, assignmentData) -> {
+            logPopulation(2, population, assignmentData);
             cows2.set(population);
         });
         pasture2.getShepherd().setPopulation(new ByteBuffer[]{}, 0);
@@ -274,8 +275,7 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
         AtomicReference<List<BlackSheep>> subHerd1 = new AtomicReference<>(List.of());
 
         String herdName = "push-static-breeding-herd";
-        Pasture<BlackSheep> pasture1 = kafkaRanch.addBreedingPasture(herdName, BlackSheep.class,
-                (population, version, generation, isLeader) -> {
+        Pasture<BlackSheep> pasture1 = kafkaRanch.addBreedingPasture(herdName, BlackSheep.class, (population, assignmentData) -> {
             logger.info("Assigned sheep1 [{}]", population);
             subHerd1.set(population);
         });
@@ -289,8 +289,7 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
 
         //setup another pasture
         AtomicReference<List<BlackSheep>> subHerd2 = new AtomicReference<>(List.of());
-        Pasture<BlackSheep> pasture2 = kafkaRanch.addBreedingPasture(herdName, BlackSheep.class,
-                (population, version, generation, isLeader) -> {
+        Pasture<BlackSheep> pasture2 = kafkaRanch.addBreedingPasture(herdName, BlackSheep.class, (population, assignmentData) -> {
             logger.info("Assigned sheep2 [{}]", population);
             subHerd2.set(population);
         });
@@ -304,7 +303,7 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
 
         //setup third pasture
         AtomicReference<List<BlackSheep>> subHerd3 = new AtomicReference<>(List.of());
-        Pasture<BlackSheep> pasture3 = kafkaRanch.addBreedingPasture(herdName, BlackSheep.class, (population, version, generation, isLeader) -> {
+        Pasture<BlackSheep> pasture3 = kafkaRanch.addBreedingPasture(herdName, BlackSheep.class, (population, assignmentData) -> {
             logger.info("Assigned cows3 [{}]", population);
             subHerd3.set(population);
         });
@@ -326,8 +325,8 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
         });
     }
 
-    private static void logPopulation(int pastureIndex, List<ByteBuffer> population, long version, boolean isLeader) {
-        logger.info("Assigned to pasture{} leader={} version={} [{}]", pastureIndex, isLeader, version, toBytes(population));
+    private static void logPopulation(int pastureIndex, List<ByteBuffer> population, AssignmentData assignmentData) {
+        logger.info("Assigned to pasture{} assignmentData={} [{}]", pastureIndex, assignmentData, toBytes(population));
     }
 
     static class BlackSheep {
