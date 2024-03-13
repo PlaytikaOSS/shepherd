@@ -15,7 +15,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static com.playtika.shepherd.inernal.CheckedHerd.checked;
 import static com.playtika.shepherd.inernal.utils.BytesUtils.toBytes;
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +34,7 @@ public class ShepherdTest extends BasicKafkaTest {
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
         AtomicInteger pasturesCountParameter = new AtomicInteger();
 
-        Herd herd = checked(new Herd() {
+        Herd herd = new Herd() {
             @Override
             public Population getPopulation(List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata) {
                 pasturesCountParameter.set(allMemberMetadata.size());
@@ -45,7 +44,7 @@ public class ShepherdTest extends BasicKafkaTest {
             @Override
             public void reset() {
             }
-        });
+        };
 
 
         LinkedBlockingQueue<ByteBuffer> cows1 = new LinkedBlockingQueue<>();
@@ -128,7 +127,7 @@ public class ShepherdTest extends BasicKafkaTest {
         AtomicInteger version = new AtomicInteger(1);
         AtomicInteger pasturesCountParameter = new AtomicInteger();
 
-        Herd herd = checked(new Herd() {
+        Herd herd = new Herd() {
             @Override
             public Population getPopulation(List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata) {
                 pasturesCountParameter.set(allMemberMetadata.size());
@@ -138,7 +137,7 @@ public class ShepherdTest extends BasicKafkaTest {
             @Override
             public void reset() {
             }
-        });
+        };
 
         LinkedBlockingQueue<ByteBuffer> cows1 = new LinkedBlockingQueue<>();
         PastureListener<ByteBuffer> rebalanceListener1 = new PastureListener<>() {

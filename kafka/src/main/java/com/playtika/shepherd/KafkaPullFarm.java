@@ -16,7 +16,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import static com.playtika.shepherd.inernal.CheckedHerd.checked;
 import static com.playtika.shepherd.serde.SerDeUtils.BYTE_BUFFER_DE_SER;
 import static com.playtika.shepherd.serde.SerDeUtils.getSerDe;
 
@@ -52,7 +51,7 @@ public class KafkaPullFarm implements Farm {
                 .setGroupId(herd.getName())
                 .setProperties(properties)
                 .setRebalanceListener(pullHerd)
-                .setHerd(checked(pullHerd))
+                .setHerd(pullHerd)
                 .build();
 
         pullHerd.setPastureShepherd(pastureShepherd);

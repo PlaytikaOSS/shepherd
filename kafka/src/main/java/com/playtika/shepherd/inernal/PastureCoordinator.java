@@ -33,6 +33,7 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.playtika.shepherd.inernal.ProtocolHelper.decompress;
 import static com.playtika.shepherd.inernal.ProtocolHelper.deserializeAssignment;
@@ -176,14 +177,39 @@ public class PastureCoordinator extends AbstractCoordinator {
         if (skipAssignment)
             throw new IllegalStateException("Can't skip assignment because static membership is not supported.");
 
-        Population population = herd.getPopulation(allMemberMetadata);
-        leaderElected = leaderId;
+        try {
+            Population population = herd.getPopulation(allMemberMetadata);
+            leaderElected = leaderId;
 
-        logger.info("Will rebalance population: [{}]", toBytes(population.getSheep()));
+            if (logger.isDebugEnabled()) {
+                logger.debug("""
+                                Will assign population of size=[{}] among members count=[{}],
+                                members=[{}],
+                                population=[{}]""",
+                        population.getSheep().size(), allMemberMetadata.size(),
+                        collectMemberIds(allMemberMetadata),
+                        toBytes(population.getSheep()));
+            } else {
+                logger.info("""
+                                Will assign population of size=[{}] among members count=[{}],
+                                members=[{}]""",
+                        population.getSheep().size(), allMemberMetadata.size(),
+                        collectMemberIds(allMemberMetadata));
+            }
 
-        return assignor.performAssignment(leaderId, protocol,
-                population.getSheep(), population.getVersion(),
-                allMemberMetadata);
+            return assignor.performAssignment(leaderId, protocol,
+                    population.getSheep(), population.getVersion(),
+                    allMemberMetadata);
+        } catch (Throwable t) {
+            logger.error("Failed to assign population. Will return empty assignment.\n" +
+                            "members count=[{}], members=[{}]",
+                    allMemberMetadata.size(), collectMemberIds(allMemberMetadata));
+            return Map.of();
+        }
+    }
+
+    private static String collectMemberIds(List<JoinGroupResponseMember> allMemberMetadata) {
+        return allMemberMetadata.stream().map(JoinGroupResponseMember::memberId).collect(Collectors.joining(", "));
     }
 
     @Override
