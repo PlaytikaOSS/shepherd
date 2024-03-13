@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.playtika.shepherd.inernal.CheckedHerd.checked;
 import static com.playtika.shepherd.inernal.utils.CacheUtils.memoize;
 import static com.playtika.shepherd.serde.SerDeUtils.BYTE_BUFFER_DE_SER;
 import static com.playtika.shepherd.serde.SerDeUtils.getSerDe;
@@ -56,7 +55,7 @@ public class KafkaPushFarm implements Farm {
                 .setGroupId(herdName)
                 .setProperties(properties)
                 .setRebalanceListener(pushHerd)
-                .setHerd(checked(pushHerd))
+                .setHerd(pushHerd)
                 .build();
 
         pushHerd.setPastureShepherd(pastureShepherd);
