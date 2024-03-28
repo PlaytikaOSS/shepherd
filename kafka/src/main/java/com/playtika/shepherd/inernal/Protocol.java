@@ -25,6 +25,13 @@ public enum Protocol {
         public String protocol() {
             return "simple-lz4";
         }
+    },
+
+    COOPERATIVE {
+        @Override
+        public String protocol() {
+            return "cooperative-lz4";
+        }
     };
 
     @Override

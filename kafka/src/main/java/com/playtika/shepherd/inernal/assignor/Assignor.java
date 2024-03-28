@@ -1,4 +1,4 @@
-package com.playtika.shepherd.inernal;
+package com.playtika.shepherd.inernal.assignor;
 
 import org.apache.kafka.common.message.JoinGroupResponseData;
 

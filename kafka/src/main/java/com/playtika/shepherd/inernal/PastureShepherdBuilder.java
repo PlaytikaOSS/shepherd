@@ -1,6 +1,7 @@
 package com.playtika.shepherd.inernal;
 
 import com.playtika.shepherd.common.PastureListener;
+import com.playtika.shepherd.inernal.assignor.RoundRobinAssignor;
 import org.apache.kafka.common.utils.LogContext;
 import org.apache.kafka.common.utils.Time;
 
@@ -17,6 +18,7 @@ public class PastureShepherdBuilder {
 
     private static final AtomicInteger CLIENT_ID_SEQUENCE = new AtomicInteger(1);
 
+    private Protocol protocol;
     private String bootstrapServers;
     private String groupId;
     private String clientId;
@@ -52,6 +54,7 @@ public class PastureShepherdBuilder {
                 time == null ? Time.SYSTEM : time,
                 clientId, logContext,
                 herd,
+                protocol,
                 new RoundRobinAssignor(),
                 rebalanceListener);
 
@@ -90,6 +93,11 @@ public class PastureShepherdBuilder {
 
     public PastureShepherdBuilder setRebalanceListener(PastureListener<ByteBuffer> rebalanceListener) {
         this.rebalanceListener = rebalanceListener;
+        return this;
+    }
+
+    public PastureShepherdBuilder setProtocol(Protocol protocol){
+        this.protocol = protocol;
         return this;
     }
 }

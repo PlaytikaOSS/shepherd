@@ -1,6 +1,7 @@
 package com.playtika.shepherd;
 
 import com.playtika.shepherd.common.push.Pasture;
+import com.playtika.shepherd.inernal.Protocol;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -32,7 +33,7 @@ public class JoinPasture {
 
         Consumer<String, String> consumer = createConsumer();
 
-        KafkaPushFarm kafkaPushFarm = new KafkaPushFarm(kafkaContainer.getBootstrapServers());
+        KafkaPushFarm kafkaPushFarm = new KafkaPushFarm(Protocol.SIMPLE, kafkaContainer.getBootstrapServers());
 
 
         Pasture<String> skyNet = kafkaPushFarm.addBreedingPasture("SkyNet", String.class,

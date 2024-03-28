@@ -9,6 +9,7 @@ import com.playtika.shepherd.common.pull.Shepherd;
 import com.playtika.shepherd.inernal.PastureShepherd;
 import com.playtika.shepherd.inernal.PastureShepherdBuilder;
 import com.playtika.shepherd.inernal.Population;
+import com.playtika.shepherd.inernal.Protocol;
 import com.playtika.shepherd.serde.SerDe;
 import org.apache.kafka.common.message.JoinGroupResponseData;
 
@@ -22,14 +23,16 @@ import static com.playtika.shepherd.serde.SerDeUtils.getSerDe;
 
 public class KafkaPullFarm implements Farm {
 
+    private final Protocol protocol;
     private final String bootstrapServers;
     private final Map<String, String> properties;
 
-    public KafkaPullFarm(String bootstrapServers) {
-        this(bootstrapServers, Map.of());
+    public KafkaPullFarm(Protocol protocol, String bootstrapServers) {
+        this(protocol, bootstrapServers, Map.of());
     }
 
-    public KafkaPullFarm(String bootstrapServers, Map<String, String> properties) {
+    public KafkaPullFarm(Protocol protocol, String bootstrapServers, Map<String, String> properties) {
+        this.protocol = protocol;
         this.bootstrapServers = bootstrapServers;
         this.properties = properties;
     }
@@ -48,6 +51,7 @@ public class KafkaPullFarm implements Farm {
         PullHerd<Breed> pullHerd = new PullHerd<>(herd, serDe, pastureListener);
 
         PastureShepherd pastureShepherd = new PastureShepherdBuilder()
+                .setProtocol(protocol)
                 .setBootstrapServers(bootstrapServers)
                 .setGroupId(herd.getName())
                 .setProperties(properties)

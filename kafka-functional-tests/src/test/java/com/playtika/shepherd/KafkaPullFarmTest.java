@@ -21,14 +21,14 @@ import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
-public class KafkaPullFarmTest extends BasicKafkaTest{
+abstract public class KafkaPullFarmTest extends BasicKafkaTest{
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaPullFarmTest.class);
 
     @Test
     public void shouldBalanceStaticHerd() {
 
-        KafkaPullFarm kafkaRanch = new KafkaPullFarm(getBootstrapServers(), TEST_PROPERTIES);
+        KafkaPullFarm kafkaRanch = new KafkaPullFarm(getProtocol(), getBootstrapServers(), TEST_PROPERTIES);
 
         ByteBuffer cow1 = ByteBuffer.wrap(new byte[]{1});
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
@@ -103,7 +103,7 @@ public class KafkaPullFarmTest extends BasicKafkaTest{
 
     private void shouldBalanceDynamicHerd(boolean versioned) {
 
-        KafkaPullFarm kafkaRanch = new KafkaPullFarm(getBootstrapServers(), TEST_PROPERTIES);
+        KafkaPullFarm kafkaRanch = new KafkaPullFarm(getProtocol(), getBootstrapServers(), TEST_PROPERTIES);
 
         AtomicReference<Herd.Population<ByteBuffer>> populationGlobal = new AtomicReference<>();
         Herd<ByteBuffer> herd = new TestHerd<>(versioned ? "pull-dynamic-group-versioned" : "pull-dynamic-group", populationGlobal);
@@ -194,7 +194,7 @@ public class KafkaPullFarmTest extends BasicKafkaTest{
     @Test
     public void shouldBalanceBreedingStaticHerd() {
 
-        KafkaPullFarm kafkaRanch = new KafkaPullFarm(getBootstrapServers(), TEST_PROPERTIES);
+        KafkaPullFarm kafkaRanch = new KafkaPullFarm(getProtocol(), getBootstrapServers(), TEST_PROPERTIES);
 
         BlackSheep sheep1 = new BlackSheep("hello", 2.37);
         BlackSheep sheep2 = new BlackSheep("world", 1.37);

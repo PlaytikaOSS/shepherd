@@ -1,6 +1,6 @@
 package com.playtika.shepherd.internal;
 
-import com.playtika.shepherd.inernal.RoundRobinAssignor;
+import com.playtika.shepherd.inernal.assignor.RoundRobinAssignor;
 import org.apache.kafka.common.message.JoinGroupResponseData;
 import org.junit.jupiter.api.Test;
 

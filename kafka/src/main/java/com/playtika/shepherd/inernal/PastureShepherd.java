@@ -16,6 +16,7 @@
  */
 package com.playtika.shepherd.inernal;
 
+import com.playtika.shepherd.inernal.assignor.Assignor;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.utils.Exit;
 import org.apache.kafka.common.utils.LogContext;

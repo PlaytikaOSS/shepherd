@@ -17,6 +17,7 @@
 package com.playtika.shepherd.inernal;
 
 import com.playtika.shepherd.common.PastureListener;
+import com.playtika.shepherd.inernal.assignor.Assignor;
 import org.apache.kafka.clients.ApiVersions;
 import org.apache.kafka.clients.ClientUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -70,6 +71,7 @@ public class PastureWorker {
                          String clientId,
                          LogContext logContext,
                          Herd herd,
+                         Protocol protocol,
                          Assignor assignor,
                          PastureListener<ByteBuffer> rebalanceListener) {
         try {
@@ -131,6 +133,7 @@ public class PastureWorker {
                     metricGrpPrefix,
                     time,
                     herd,
+                    protocol,
                     assignor,
                     rebalanceListener);
 
