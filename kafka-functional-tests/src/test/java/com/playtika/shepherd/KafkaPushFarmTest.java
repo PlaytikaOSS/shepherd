@@ -21,14 +21,14 @@ import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
-public class KafkaPushFarmTest extends BasicKafkaTest{
+abstract public class KafkaPushFarmTest extends BasicKafkaTest{
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaPushFarmTest.class);
 
     @Test
     public void shouldBalanceStaticHerd() {
 
-        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getBootstrapServers(), TEST_PROPERTIES);
+        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getProtocol(), getBootstrapServers(), TEST_PROPERTIES);
 
         ByteBuffer cow1 = ByteBuffer.wrap(new byte[]{1});
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
@@ -104,7 +104,7 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
 
     private void shouldBalanceDynamicHerd(boolean versioned) {
 
-        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getBootstrapServers(), TEST_PROPERTIES);
+        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getProtocol(), getBootstrapServers(), TEST_PROPERTIES);
 
         ByteBuffer cow1 = ByteBuffer.wrap(new byte[]{1});
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
@@ -198,7 +198,7 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
     @Test
     public void shouldBalanceDynamicConcurrentSequenceHerd() {
 
-        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getBootstrapServers(), TEST_PROPERTIES);
+        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getProtocol(), getBootstrapServers(), TEST_PROPERTIES);
 
         ByteBuffer cow1 = ByteBuffer.wrap(new byte[]{1});
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
@@ -265,7 +265,7 @@ public class KafkaPushFarmTest extends BasicKafkaTest{
     @Test
     public void shouldBalanceBreedingStaticHerd() {
 
-        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getBootstrapServers(), TEST_PROPERTIES);
+        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getProtocol(), getBootstrapServers(), TEST_PROPERTIES);
 
         BlackSheep sheep1 = new BlackSheep("hello", 2.37);
         BlackSheep sheep2 = new BlackSheep("world", 1.37);

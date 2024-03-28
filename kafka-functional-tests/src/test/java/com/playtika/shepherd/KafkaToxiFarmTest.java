@@ -1,6 +1,7 @@
 package com.playtika.shepherd;
 
 import com.playtika.shepherd.common.push.Pasture;
+import com.playtika.shepherd.inernal.Protocol;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
@@ -113,7 +114,7 @@ public class KafkaToxiFarmTest {
     @Test
     public void shouldRestoreBalanceForStaticHerd() throws IOException {
 
-        KafkaPushFarm kafkaRanch = new KafkaPushFarm(getBootstrapServers(), TEST_PROPERTIES);
+        KafkaPushFarm kafkaRanch = new KafkaPushFarm(Protocol.SIMPLE, getBootstrapServers(), TEST_PROPERTIES);
 
         ByteBuffer cow1 = ByteBuffer.wrap(new byte[]{1});
         ByteBuffer cow2 = ByteBuffer.wrap(new byte[]{0});
@@ -136,7 +137,7 @@ public class KafkaToxiFarmTest {
         });
 
         //setup toxi pasture
-        KafkaPushFarm kafkaToxiRanch = new KafkaPushFarm(getToxiBootstrapServers(), TEST_PROPERTIES);
+        KafkaPushFarm kafkaToxiRanch = new KafkaPushFarm(Protocol.SIMPLE, getToxiBootstrapServers(), TEST_PROPERTIES);
         AtomicReference<List<ByteBuffer>> cows2 = new AtomicReference<>(List.of());
         Pasture<ByteBuffer> pasture2 = kafkaToxiRanch.addPasture(herdName, (population, assignmentData) -> {
             logger.info("Assigned cows2 [{}]", toBytes(population));

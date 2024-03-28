@@ -18,6 +18,7 @@ package com.playtika.shepherd.inernal;
 
 import com.playtika.shepherd.common.AssignmentData;
 import com.playtika.shepherd.common.PastureListener;
+import com.playtika.shepherd.inernal.assignor.Assignor;
 import org.apache.kafka.clients.GroupRebalanceConfig;
 import org.apache.kafka.clients.consumer.internals.AbstractCoordinator;
 import org.apache.kafka.clients.consumer.internals.ConsumerNetworkClient;
@@ -36,8 +37,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.playtika.shepherd.inernal.ProtocolHelper.compress;
 import static com.playtika.shepherd.inernal.ProtocolHelper.decompress;
 import static com.playtika.shepherd.inernal.ProtocolHelper.deserializeAssignment;
+import static com.playtika.shepherd.inernal.ProtocolHelper.serializeAssignment;
 import static com.playtika.shepherd.inernal.utils.BytesUtils.toBytes;
 import static org.apache.kafka.common.message.JoinGroupRequestData.JoinGroupRequestProtocolCollection;
 import static org.apache.kafka.common.message.JoinGroupResponseData.JoinGroupResponseMember;
@@ -60,6 +63,7 @@ public class PastureCoordinator extends AbstractCoordinator {
     private final Herd herd;
     private final Assignor assignor;
     private final PastureListener<ByteBuffer> listener;
+    private final Protocol protocol;
 
     /**
      * Initialize the coordination manager.
@@ -71,6 +75,7 @@ public class PastureCoordinator extends AbstractCoordinator {
                               String metricGrpPrefix,
                               Time time,
                               Herd herd,
+                              Protocol protocol,
                               Assignor assignor,
                               PastureListener<ByteBuffer> listener) {
         super(config,
@@ -84,6 +89,7 @@ public class PastureCoordinator extends AbstractCoordinator {
         this.herd = herd;
         this.listener = listener;
         this.rejoinRequested = false;
+        this.protocol = protocol;
         this.assignor = assignor;
         this.coordinatorDiscoveryTimeoutMs = config.heartbeatIntervalMs;
         this.lastCompletedGenerationId = Generation.NO_GENERATION.generationId;
@@ -97,7 +103,7 @@ public class PastureCoordinator extends AbstractCoordinator {
 
     @Override
     public String protocolType() {
-        return Protocol.SIMPLE.protocol();
+        return protocol.protocol();
     }
 
     // expose for tests
@@ -164,10 +170,19 @@ public class PastureCoordinator extends AbstractCoordinator {
 
     @Override
     public JoinGroupRequestProtocolCollection metadata() {
+        byte[] metadata;
+        if(protocol == Protocol.COOPERATIVE){
+            metadata = assignmentSnapshot != null ? toBytes(compress(serializeAssignment(assignmentSnapshot))) : new byte[0];
+        } else if(protocol == Protocol.SIMPLE){
+            metadata = new byte[0];
+        } else {
+            throw new IllegalArgumentException("Unknown protocol=["+protocol+"]");
+        }
+
         return new JoinGroupRequestProtocolCollection(Collections.singleton(
                         new JoinGroupRequestData.JoinGroupRequestProtocol()
-                                .setName(Protocol.SIMPLE.protocol())
-                                .setMetadata(new byte[0]))
+                                .setName(protocolType())
+                                .setMetadata(metadata))
                 .iterator());
     }
 

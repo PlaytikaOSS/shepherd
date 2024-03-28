@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 
-public class ShepherdTest extends BasicKafkaTest {
+abstract public class ShepherdTest extends BasicKafkaTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ShepherdTest.class);
 
@@ -63,6 +63,7 @@ public class ShepherdTest extends BasicKafkaTest {
         };
 
         PastureShepherd herder1 = new PastureShepherdBuilder()
+                .setProtocol(getProtocol())
                 .setBootstrapServers(getBootstrapServers())
                 .setGroupId(groupId)
                 .setHerd(herd)
@@ -93,6 +94,7 @@ public class ShepherdTest extends BasicKafkaTest {
         };
 
         PastureShepherd herder2 = new PastureShepherdBuilder()
+                .setProtocol(getProtocol())
                 .setBootstrapServers(getBootstrapServers())
                 .setGroupId(groupId)
                 .setHerd(herd)
@@ -155,6 +157,7 @@ public class ShepherdTest extends BasicKafkaTest {
         };
 
         PastureShepherd herder1 = new PastureShepherdBuilder()
+                .setProtocol(getProtocol())
                 .setBootstrapServers(getBootstrapServers())
                 .setGroupId(groupId)
                 .setHerd(herd)
@@ -179,6 +182,7 @@ public class ShepherdTest extends BasicKafkaTest {
         };
 
         PastureShepherd herder2 = new PastureShepherdBuilder()
+                .setProtocol(getProtocol())
                 .setBootstrapServers(getBootstrapServers())
                 .setGroupId(groupId)
                 .setHerd(herd)

@@ -9,6 +9,7 @@ import com.playtika.shepherd.inernal.Herd;
 import com.playtika.shepherd.inernal.PastureShepherd;
 import com.playtika.shepherd.inernal.PastureShepherdBuilder;
 import com.playtika.shepherd.inernal.Population;
+import com.playtika.shepherd.inernal.Protocol;
 import com.playtika.shepherd.serde.SerDe;
 import org.apache.kafka.common.message.JoinGroupResponseData;
 
@@ -26,14 +27,18 @@ import static com.playtika.shepherd.serde.SerDeUtils.getSerDe;
 public class KafkaPushFarm implements Farm {
 
     public static final int NO_VERSION = -1;
+
+    private final Protocol protocol;
     private final String bootstrapServers;
     private final Map<String, String> properties;
 
-    public KafkaPushFarm(String bootstrapServers) {
-        this(bootstrapServers, Map.of());
+
+    public KafkaPushFarm(Protocol protocol, String bootstrapServers) {
+        this(protocol, bootstrapServers, Map.of());
     }
 
-    public KafkaPushFarm(String bootstrapServers, Map<String, String> properties) {
+    public KafkaPushFarm(Protocol protocol, String bootstrapServers, Map<String, String> properties) {
+        this.protocol = protocol;
         this.bootstrapServers = bootstrapServers;
         this.properties = properties;
     }
@@ -52,6 +57,7 @@ public class KafkaPushFarm implements Farm {
         PushHerd<Breed> pushHerd = new PushHerd<>(pastureListener, serDe);
 
         PastureShepherd pastureShepherd = new PastureShepherdBuilder()
+                .setProtocol(protocol)
                 .setBootstrapServers(bootstrapServers)
                 .setGroupId(herdName)
                 .setProperties(properties)

@@ -1,5 +1,6 @@
-package com.playtika.shepherd.inernal;
+package com.playtika.shepherd.inernal.assignor;
 
+import com.playtika.shepherd.inernal.Assignment;
 import org.apache.kafka.common.message.JoinGroupResponseData;
 
 import java.nio.ByteBuffer;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 import static com.playtika.shepherd.inernal.ProtocolHelper.compress;
 import static com.playtika.shepherd.inernal.ProtocolHelper.serializeAssignment;
+import static com.playtika.shepherd.inernal.utils.MathUtils.ceilDivide;
 
 /**
  * Sort population lexicographically before assignment in round-robin way
@@ -23,7 +25,7 @@ public class RoundRobinAssignor implements Assignor {
 
         int herdSize = population.size();
         int pasturesCount = allMemberMetadata.size();
-        int sheepPerPasture = herdSize / pasturesCount + 1;
+        int sheepPerPasture = ceilDivide(herdSize, pasturesCount);
 
         List<Assignment> assignments = allMemberMetadata.stream()
                 .map(member -> new Assignment(leaderId, version, new ArrayList<>(sheepPerPasture)))
@@ -33,8 +35,14 @@ public class RoundRobinAssignor implements Assignor {
             assignments.get(sheepId % pasturesCount).assigned().add(population.get(sheepId));
         }
 
+        return assignmentsToMap(assignments, allMemberMetadata);
+    }
+
+    static Map<String, ByteBuffer> assignmentsToMap(
+            List<Assignment> assignments,
+            List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata) {
         Map<String, ByteBuffer> assignmentsMap = new HashMap<>(assignments.size());
-        for(int assignmentId = 0; assignmentId < pasturesCount; assignmentId++){
+        for(int assignmentId = 0, pasturesCount = assignments.size(); assignmentId < pasturesCount; assignmentId++){
             assignmentsMap.put(allMemberMetadata.get(assignmentId).memberId(), compress(serializeAssignment(assignments.get(assignmentId))));
         }
         return assignmentsMap;
