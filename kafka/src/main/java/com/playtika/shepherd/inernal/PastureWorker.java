@@ -23,6 +23,7 @@ import org.apache.kafka.clients.ClientUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.GroupRebalanceConfig;
 import org.apache.kafka.clients.Metadata;
+import org.apache.kafka.clients.MetadataRecoveryStrategy;
 import org.apache.kafka.clients.NetworkClient;
 import org.apache.kafka.clients.consumer.internals.ConsumerNetworkClient;
 import org.apache.kafka.common.KafkaException;
@@ -93,7 +94,9 @@ public class PastureWorker {
 
             this.metrics = new Metrics(metricConfig, reporters, time, metricsContext);
             long retryBackoffMs = config.getLong(CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG);
-            Metadata metadata = new Metadata(retryBackoffMs, config.getLong(CommonClientConfigs.METADATA_MAX_AGE_CONFIG),
+            long retryBackoffMaxMs = config.getLong(CommonClientConfigs.RETRY_BACKOFF_MAX_MS_CONFIG);
+            Metadata metadata = new Metadata(retryBackoffMs, retryBackoffMaxMs,
+                    config.getLong(CommonClientConfigs.METADATA_MAX_AGE_CONFIG),
                     logContext, new ClusterResourceListeners());
             List<InetSocketAddress> addresses = ClientUtils.parseAndValidateAddresses(
                     config.getList(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG),
@@ -116,7 +119,8 @@ public class PastureWorker {
                     time,
                     true,
                     new ApiVersions(),
-                    logContext);
+                    logContext,
+                    MetadataRecoveryStrategy.forName(config.getString(CommonClientConfigs.METADATA_RECOVERY_STRATEGY_CONFIG)));
             this.client = new ConsumerNetworkClient(
                     logContext,
                     netClient,

@@ -18,6 +18,7 @@ package com.playtika.shepherd.inernal;
 
 import org.apache.kafka.clients.ClientDnsLookup;
 import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.clients.MetadataRecoveryStrategy;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.KafkaFuture;
@@ -30,9 +31,11 @@ import org.apache.kafka.common.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.apache.kafka.clients.CommonClientConfigs.AUTO_INCLUDE_JMX_REPORTER_CONFIG;
 import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
@@ -173,6 +176,18 @@ public class DistributedConfig extends AbstractConfig {
                     atLeast(0L),
                     ConfigDef.Importance.LOW,
                     CommonClientConfigs.RETRY_BACKOFF_MS_DOC)
+            .define(CommonClientConfigs.RETRY_BACKOFF_MAX_MS_CONFIG,
+                    ConfigDef.Type.LONG,
+                    CommonClientConfigs.DEFAULT_RETRY_BACKOFF_MAX_MS,
+                    atLeast(0L),
+                    ConfigDef.Importance.LOW,
+                    CommonClientConfigs.RETRY_BACKOFF_MAX_MS_DOC)
+            .define(CommonClientConfigs.METADATA_RECOVERY_STRATEGY_CONFIG,
+                    ConfigDef.Type.STRING,
+                    CommonClientConfigs.DEFAULT_METADATA_RECOVERY_STRATEGY,
+                    ConfigDef.CaseInsensitiveValidString.in(Utils.enumOptions(MetadataRecoveryStrategy.class)),
+                    ConfigDef.Importance.LOW,
+                    CommonClientConfigs.METADATA_RECOVERY_STRATEGY_DOC)
             .define(CommonClientConfigs.REQUEST_TIMEOUT_MS_CONFIG,
                     ConfigDef.Type.INT,
                     Math.toIntExact(TimeUnit.SECONDS.toMillis(40)),
@@ -204,7 +219,9 @@ public class DistributedConfig extends AbstractConfig {
                                 throw new ConfigException(name, value, "Invalid protocol");
                             }
                         },
-                        () -> "[" + Utils.join(Protocol.values(), ", ") + "]"),
+                        () -> Arrays.stream(Protocol.values())
+                                .map(Protocol::toString)
+                                .collect(Collectors.joining(", ", "[", "]"))),
                     ConfigDef.Importance.LOW,
                     PROTOCOL_DOC);
     }
