@@ -27,9 +27,9 @@
     </licenses>
 
     <scm>
-        <url>https://svn.apache.org/viewvc/maven</url>
+        <url>https://github.com/PlaytikaOSS/shepherd</url>
         <connection>scm:git:git://github.com/PlaytikaOSS/shepherd.git</connection>
-        <developerConnection>scm:git:git@github.com/PlaytikaOSS/shepherd</developerConnection>
+        <developerConnection>scm:git:git@github.com:PlaytikaOSS/shepherd.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -43,8 +43,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -62,16 +61,15 @@
         <mockito.version>5.8.0</mockito.version>
 
         <!--plugins -->
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.2.1</maven-surefire-plugin.version>
-        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
-        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-        <maven.javadoc.plugin.version>3.6.0</maven.javadoc.plugin.version>
-        <maven.source.plugin.version>3.3.0</maven.source.plugin.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <maven.javadoc.plugin.version>3.12.0</maven.javadoc.plugin.version>
         <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
 
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-        <gitflow-incremental-builder.version>4.5.1</gitflow-incremental-builder.version>
+        <gitflow-incremental-builder.version>4.5.6</gitflow-incremental-builder.version>
     </properties>
 
     <dependencyManagement>
@@ -190,8 +188,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <release>${java.version}</release>
                     </configuration>
                 </plugin>
 
@@ -234,7 +231,6 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <source>17</source>
                         <doclint>none</doclint>
                         <failOnError>false</failOnError>
                     </configuration>
