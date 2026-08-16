@@ -11,6 +11,9 @@
 
     <artifactId>kafka</artifactId>
 
+    <name>shepherd-kafka</name>
+    <description>Kafka-based implementation of the Shepherd rebalancing protocol.</description>
+
     <dependencies>
 
         <dependency>

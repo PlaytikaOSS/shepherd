@@ -11,5 +11,8 @@
 
     <artifactId>common</artifactId>
 
+    <name>shepherd-common</name>
+    <description>Shared API and model classes used by the Shepherd modules.</description>
+
 
 </project>

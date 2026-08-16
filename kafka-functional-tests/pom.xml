@@ -11,6 +11,13 @@
 
     <artifactId>kafka-functional-tests</artifactId>
 
+    <name>shepherd-kafka-functional-tests</name>
+    <description>Testcontainers-based functional test suite for the Shepherd Kafka module. Not published to Maven Central.</description>
+
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -50,5 +57,23 @@
         </dependency>
 
     </dependencies>
+
+    <profiles>
+        <!-- Internal module: build it, but never ship it to Maven Central. -->
+        <profile>
+            <id>central</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <configuration>
+                            <skipPublishing>true</skipPublishing>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

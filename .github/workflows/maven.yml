@@ -12,7 +12,7 @@ on:
       - develop
 
 jobs:
-  build-jdk17:
+  build-jdk21:
     runs-on: ubuntu-latest
     name: Build project
     concurrency:
@@ -21,19 +21,14 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'corretto'
+          cache: 'maven'
       - name: Build with Maven
-        run: ./mvnw -version && whoami && umask -S && umask a+rw && umask -S && ./mvnw clean verify -P docker-clean -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryHandler.count=3 --no-snapshot-updates --batch-mode --no-transfer-progress
+        run: ./mvnw -version && whoami && umask -S && umask a+rw && umask -S && ./mvnw clean verify -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryHandler.count=3 --no-snapshot-updates --batch-mode --no-transfer-progress
