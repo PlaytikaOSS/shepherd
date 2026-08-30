@@ -220,7 +220,7 @@ public class PastureCoordinator extends AbstractCoordinator {
         } catch (Throwable t) {
             logger.error("Failed to assign population. Will return empty assignment.\n" +
                             "members count=[{}], members=[{}]",
-                    allMemberMetadata.size(), collectMemberIds(allMemberMetadata));
+                    allMemberMetadata.size(), collectMemberIds(allMemberMetadata), t);
             return Map.of();
         }
     }
@@ -231,6 +231,17 @@ public class PastureCoordinator extends AbstractCoordinator {
 
     @Override
     protected void onJoinComplete(int generation, String memberId, String protocol, ByteBuffer memberAssignment) {
+        if (!memberAssignment.hasRemaining()) {
+            //The leader failed to compute an assignment (see onLeaderElected) and every member got an empty buffer.
+            //Previous assignments were already revoked in onJoinPrepare, so own nothing and leave assignmentSnapshot
+            //null - rejoinNeededOrPending() then keeps returning true and the next poll rejoins the group,
+            //retrying the assignment instead of crashing on an undecodable buffer.
+            logger.error("Received empty assignment for generation: {}, memberId: {}. " +
+                    "The leader failed to assign the population, will rejoin the group and retry.", generation, memberId);
+            listener.assigned(List.of(), new AssignmentData(0, -1, memberId, -generation, false));
+            assignmentSnapshot = null;
+            return;
+        }
         Assignment newAssignment = deserializeAssignment(decompress(memberAssignment));
         if(logger.isDebugEnabled()){
             logger.debug("Received new assignment version: {}, generation: {}, memberId: {}\nassigned: [{}]",

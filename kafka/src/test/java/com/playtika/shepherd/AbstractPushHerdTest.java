@@ -122,6 +122,26 @@ abstract public class AbstractPushHerdTest<Breed> {
     }
 
     @Test
+    public void shouldReturnSameSnapshotWhenLeaderElectionRunsAgainWithinSameRebalance(){
+        //set initial population
+        Breed[] population0 = getPopulation0();
+        pushHerd.setPopulation(population0, 0);
+
+        //leader elected, takes the snapshot
+        Population population = pushHerd.getPopulation(null);
+
+        //SyncGroup failed with REBALANCE_IN_PROGRESS: AbstractCoordinator re-runs join and leader election
+        //without onJoinPrepare (and thus without reset()), so getPopulation is called again
+        Population retried = pushHerd.getPopulation(null);
+        assertThat(retried).isSameAs(population);
+
+        //a full new rebalance (onJoinPrepare -> reset) hands out the same population again
+        pushHerd.reset();
+        assertThat(pushHerd.getPopulation(null).getSheep()).containsExactlyElementsOf(
+                getSerDe().serialize(Arrays.asList(population0)));
+    }
+
+    @Test
     public void shouldNotUpdateIfTheSameVersion(){
         //set initial population
         Breed[] population0 = getPopulation0();

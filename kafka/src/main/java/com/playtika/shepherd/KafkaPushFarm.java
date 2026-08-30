@@ -120,8 +120,11 @@ public class KafkaPushFarm implements Farm {
 
         @Override
         public synchronized Population getPopulation(List<JoinGroupResponseData.JoinGroupResponseMember> allMemberMetadata) {
+            //AbstractCoordinator re-runs join and leader election without onJoinPrepare (and thus reset())
+            //when SyncGroup fails with REBALANCE_IN_PROGRESS, so within one rebalance this must stay idempotent
+            //and keep returning the snapshot taken on the first call
             if(snapshot != null){
-                throw new IllegalStateException("Should be called only once on rebalance");
+                return snapshot;
             }
             if(latest == null){
                 throw new IllegalStateException("Herd was not initialized before rebalance");
